@@ -71,7 +71,7 @@ function feedbackForMove(before,after,m){
 function legalStandard(s){const saved=variantMode;try{variantMode="standard";return legal(s);}finally{variantMode=saved;}}
 function applyStandard(s,m){const saved=variantMode;try{variantMode="standard";return apply(s,m);}finally{variantMode=saved;}}
 function checkStandard(s){const saved=variantMode;try{variantMode="standard";return checked(s);}finally{variantMode=saved;}}
-function status(g){const s=state(g),moves=legalStandard(s);if(!moves.length)return checkStandard(s)?"Schachmatt":"Patt";if(s.half>=150)return "Remis (75 Züge)";if(s.half>=100)return "Remis (50 Züge)";return "";}
+function status(g){const s=state(g),moves=legalStandard(s);if(!moves.length)return checkStandard(s)?"Schachmatt":"Patt";if(s.half>=150)return "Remis (75 Züge)";return "";}
 function drawCards(){
  grid.replaceChildren();games.forEach((g,i)=>{const b=document.createElement("button");b.type="button";b.className="simultan-card"+(i===active?" active":"");b.textContent="Brett "+(i+1)+" · "+(g.finished|| (g.awaitingSwitch?"Wechsel folgt":state(g).t===g.humanColor?"Du bist dran":"Bot denkt"))+" · Stärke "+g.strength;b.setAttribute("aria-current",i===active?"true":"false");b.onclick=()=>showBoard(i);grid.append(b);});
 }
