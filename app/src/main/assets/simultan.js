@@ -6,7 +6,7 @@ if(!panel||!count||!strength||!grid||!board)return;
 let games=[],active=0,selected=-1,epoch=0,timers=new Set(),switchTimer=null,viewGeneration=0;
 function cancelSwitch(){viewGeneration++;if(switchTimer!==null){clearTimeout(switchTimer);switchTimer=null;}}
 function showBoard(i){dragStart=-1;dragPointer=null;dragBoard=-1;if(!games.length)return;const previous=games[active];cancelSwitch();if(previous)previous.awaitingSwitch=false;stopMotion();active=(i+games.length)%games.length;games[active].awaitingSwitch=false;selected=-1;draw();}
-function autoNext(g,delay=2000){if(panel.hidden||games[active]!==g)return;const generation=viewGeneration;switchTimer=setTimeout(()=>{switchTimer=null;if(generation!==viewGeneration||panel.hidden||games[active]!==g)return;g.awaitingSwitch=false;const next=(active+1)%games.length;if(next!==active)showBoard(next);},delay);}
+function autoNext(g,delay=2000){if(panel.hidden||games[active]!==g)return;const generation=viewGeneration;switchTimer=setTimeout(()=>{switchTimer=null;if(generation!==viewGeneration||panel.hidden||games[active]!==g)return;g.awaitingSwitch=false;const next=(active+1)%games.length;if(next!==active)showBoard(next);else draw();},delay);}
 let activeMotionCleanup=null;
 function stopMotion(){if(activeMotionCleanup){activeMotionCleanup();activeMotionCleanup=null;}}
 function animateMove(g,m){
