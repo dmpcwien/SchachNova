@@ -97,7 +97,7 @@ board.addEventListener("pointerup",event=>{
  const from=dragStart,sourceBoard=dragBoard;dragStart=-1;dragPointer=null;dragBoard=-1;
  if(Math.hypot(event.clientX-dragX,event.clientY-dragY)<14)return;
  suppressTap=true;setTimeout(()=>{suppressTap=false;},300);
- if(sourceBoard!==active)return;
+ if(sourceBoard!==active||panel.hidden)return;
  const hit=document.elementFromPoint(event.clientX,event.clientY)?.closest(".simultan-square");
  if(!hit||!board.contains(hit))return;
  const g=games[active],target=Number(hit.dataset.square);
