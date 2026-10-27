@@ -99,7 +99,7 @@ board.addEventListener("pointerup",event=>{
  suppressTap=true;setTimeout(()=>{suppressTap=false;},300);
  if(sourceBoard!==active||panel.hidden||panel.classList.contains("simultan-closing"))return;
  const hit=document.elementFromPoint(event.clientX,event.clientY)?.closest(".simultan-square");
- if(!hit||!board.contains(hit))return;
+ if(!hit||!board.contains(hit)||panel.classList.contains("simultan-closing"))return;
  const g=games[active],target=Number(hit.dataset.square);
  if(!g||g.finished||g.awaitingSwitch||state(g).t!==g.humanColor)return;
  const move=legalStandard(state(g)).find(m=>m[0]===from&&m[1]===target&&(!m[2]||m[2]==="q"));
