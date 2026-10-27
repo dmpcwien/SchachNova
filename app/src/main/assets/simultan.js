@@ -87,7 +87,7 @@ let dragStart=-1,dragPointer=null,dragX=0,dragY=0,suppressTap=false,dragBoard=-1
 board.addEventListener("pointerdown",event=>{
  if(event.pointerType==="mouse"&&event.button!==0)return;
  const cell=event.target.closest(".simultan-square");
- const g=games[active];if(panel.hidden||!cell||!g||g.finished||g.awaitingSwitch||state(g).t!==g.humanColor)return;
+ const g=games[active];if(panel.hidden||panel.classList.contains("simultan-closing")||!cell||!g||g.finished||g.awaitingSwitch||state(g).t!==g.humanColor)return;
  const i=Number(cell.dataset.square);
  if(side(state(g).b[i])!==g.humanColor)return;
  dragStart=i;dragPointer=event.pointerId;dragX=event.clientX;dragY=event.clientY;dragBoard=active;
