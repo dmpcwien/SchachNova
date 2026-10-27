@@ -33,10 +33,10 @@ function animateMove(g,m){
  board.style.position="relative";board.append(overlay);target.style.visibility="hidden";
  const dx=tr.left-fr.left,dy=tr.top-fr.top;
  const distance=Math.hypot((m[1]&7)-(m[0]&7),(m[1]>>4)-(m[0]>>4));
- const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+ const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
  const duration=reduced?0:Math.min(410,Math.max(190,175+distance*29));
  let done=false,animation;
- const cleanup=()=>{if(done)return;done=true;overlay.remove();target.style.visibility="";if(activeMotionCleanup===cleanup)activeMotionCleanup=null;};
+ const cleanup=()=>{if(done)return;done=true;overlay.remove();if(target.isConnected)target.style.visibility="";if(activeMotionCleanup===cleanup)activeMotionCleanup=null;};
  activeMotionCleanup=cleanup;
  if(reduced){cleanup();return;}
  animation=sprite.animate([
