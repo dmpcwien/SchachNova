@@ -53,6 +53,8 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check app/src/main/assets/chess.js
+          node --check app/src/main/assets/simultan.js
+          node --check app/src/main/assets/variant-tests.js
           node --check app/src/main/assets/fairy-bridge.js
           node --check app/src/main/assets/fairy-stockfish.js
           node --check app/src/main/assets/online-client.js
