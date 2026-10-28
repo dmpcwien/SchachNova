@@ -180,9 +180,7 @@ function click(i){
   if(uci(m)!==expected){errors++;label("Nicht die gesuchte Fortsetzung. Überlege, wie du das Zentrum kontrollierst und deine Figuren entwickelst. Tipp zeigt den erwarteten Zug.");renderTraining();return;}
   resetHint();busy=true;applyTrainingMove(m).then(()=>{if(!active||trainingFinished)return;ply++;label("Richtig! "+active.data.notes[ply-1]);return autoOpening();}).finally(()=>{busy=false;});return;
  }
- resetHint();applyTrainingMove(m);
- const outcome=endgameResult();if(outcome){finishTraining(outcome);return;}
- engineReply();
+ resetHint();busy=true;applyTrainingMove(m).then(()=>{if(!active||trainingFinished)return;const outcome=endgameResult();if(outcome){finishTraining(outcome);return;}engineReply();}).catch(e=>{console.error("Endspielanimation:",e);label("Der Zug konnte nicht vollständig dargestellt werden.");}).finally(()=>{if(!worker)busy=false;});
 }
 function engineReply(){
  if(!active||active.opening||trainingFinished||state.t!==-1)return;
@@ -193,7 +191,7 @@ function engineReply(){
    if(w!==worker||!active||trainingFinished)return;const line=String(e.data).trim();
    if(line==="uciok"){w.postMessage("isready");return;}
    if(line==="readyok"){w.postMessage("position fen "+posFen(state));w.postMessage("go depth 8");return;}
-   if(line.startsWith("bestmove ")){const moveText=line.split(/\s+/)[1],m=legal(state).find(m=>uci(m)===moveText);stopWorker();if(m){applyTrainingMove(m);const outcome=endgameResult();if(outcome)finishTraining(outcome);else label("Schwarz hat "+moveText+" gespielt. "+active.data.goal);}else {const outcome=endgameResult();if(outcome)finishTraining(outcome);else label("Kein gültiger Gegenzug gefunden.");}}
+   if(line.startsWith("bestmove ")){const moveText=line.split(/\s+/)[1],m=legal(state).find(m=>uci(m)===moveText);stopWorker();if(m){busy=true;applyTrainingMove(m).then(()=>{if(!active||trainingFinished)return;const outcome=endgameResult();if(outcome)finishTraining(outcome);else label("Schwarz hat "+moveText+" gespielt. "+active.data.goal);}).catch(e=>{console.error("Engine-Zuganimation:",e);label("Der Computerzug konnte nicht dargestellt werden.");}).finally(()=>{busy=false;});}else {const outcome=endgameResult();if(outcome)finishTraining(outcome);else label("Kein gültiger Gegenzug gefunden.");}}
   };
   w.onerror=()=>{stopWorker();label("Offline-Engine nicht verfügbar. Die Übung kann zurückgesetzt werden.");};
   w.postMessage("uci");
