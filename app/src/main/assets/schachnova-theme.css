@@ -847,3 +847,26 @@ html,body{background:radial-gradient(ellipse 110% 55% at 50% -12%,#254463 0%,#0c
 .modal-box h2,.review-panel h2,.history h2{letter-spacing:-.025em;color:#f6f9ff}
 .modal-box p,.review-panel p{line-height:1.55}
 @media(prefers-reduced-motion:reduce){.nova-premium-menu button,.nova-menu-grid button,.home-grid button,.side button{transition:none}}
+
+
+/* Premium refinement: legible controls and touch-friendly chess interactions. */
+:root{--nova-focus:#b2e9ff;--nova-gold:#edcd85}
+button{font-family:inherit;-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:not-allowed;filter:saturate(.7)}
+button:not(:disabled){touch-action:manipulation}
+#board .sq,#simultanPanel .simultan-square{transition:box-shadow .13s ease,filter .13s ease}
+#board .sq:focus-visible,#simultanPanel .simultan-square:focus-visible{outline:3px solid var(--nova-focus)!important;outline-offset:-3px;z-index:3}
+#board .sq.target:has(.piece-img){box-shadow:inset 0 0 0 4px #207da9,inset 0 0 0 7px #d4f4ff88}
+#board .sq.selected{box-shadow:inset 0 0 0 4px var(--nova-gold),inset 0 0 0 6px #fff3}
+#board .sq.lastmove{background:#a4bfd1!important}
+#board .sq .piece-img{pointer-events:none;user-select:none;-webkit-user-drag:none}
+#simultanPanel .simultan-square .simultan-piece{pointer-events:none;user-select:none;-webkit-user-drag:none}
+#simultanPanel .simultan-square.target:after{background:#176c9b99}
+#simultanPanel .simultan-square.target:has(.simultan-piece):after{background:transparent;border-color:#b1e8ff}
+#simultanPanel .simultan-square.selected{box-shadow:inset 0 0 0 4px var(--nova-gold)}
+.nova-premium-menu button,.nova-menu-grid button{min-height:52px;line-height:1.35}
+.nova-premium-menu button small,.nova-menu-grid button small{color:#b6cbe1}
+.coach,.history,.modal-box{line-height:1.5}
+#promotionDialog .modal-box [data-promotion],#promotionCancel{min-height:44px;margin:4px;border-radius:12px}
+#promotionDialog .modal-box [data-promotion]:focus-visible,#promotionCancel:focus-visible{outline:3px solid var(--nova-focus);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){#board .sq,#simultanPanel .simultan-square{transition:none}}
