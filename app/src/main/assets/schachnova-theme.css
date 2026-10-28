@@ -870,3 +870,23 @@ button:not(:disabled){touch-action:manipulation}
 #promotionDialog .modal-box [data-promotion],#promotionCancel{min-height:44px;margin:4px;border-radius:12px}
 #promotionDialog .modal-box [data-promotion]:focus-visible,#promotionCancel:focus-visible{outline:3px solid var(--nova-focus);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){#board .sq,#simultanPanel .simultan-square{transition:none}}
+
+
+/* Consistent premium presentation for openings, endgames, variants and coach. */
+.training-screen{color:#eff5ff}
+.training-top,.training-list,.training-board-area{min-width:0}
+.training-card,.training-list button,.training-actions button,.variant-option,.variant-button{background:linear-gradient(155deg,#203650,#12243b)!important;color:#edf5ff!important;border:1px solid #446382!important;border-radius:14px!important;box-shadow:inset 0 1px 0 #ffffff10,0 5px 16px #0003}
+.training-card:focus-visible,.training-list button:focus-visible,.training-actions button:focus-visible{outline:3px solid #b2e9ff;outline-offset:2px}
+.training-board{border:2px solid #7291ac!important;border-radius:10px!important;box-shadow:0 0 0 5px #0d1b2e,0 14px 32px #0008!important}
+.training-board>.sq.light{background:#dce8ef!important}
+.training-board>.sq.dark{background:#6e8ba7!important}
+.training-board>.sq.hint-origin{background:#dfc17b!important;box-shadow:inset 0 0 0 4px #f7de9a!important}
+.training-board>.sq.hint-destination{background:#7db8d2!important;box-shadow:inset 0 0 0 4px #d0f3ff!important}
+.training-board>.sq .piece-img{width:94%!important;height:94%!important;filter:drop-shadow(0 2px 2px #0008) drop-shadow(0 1px 3px #0004)!important}
+#trainingMessage,.training-message,.training-goal,.training-info{background:linear-gradient(145deg,#1b304a,#11243b)!important;color:#eaf4ff!important;border:1px solid #486786!important;border-radius:14px!important;line-height:1.55;padding:12px}
+.coach-bubble,.coach-message,.coach-card{background:linear-gradient(145deg,#1d3955,#14273f)!important;color:#eef7ff!important;border:1px solid #537a9c!important;border-radius:16px!important;box-shadow:0 8px 22px #0004}
+.coach-bubble strong{color:#f2d18a}
+#trainingScreen h2,#trainingScreen h3{color:#f6f9ff;letter-spacing:-.025em}
+#trainingScreen p,#trainingScreen small{line-height:1.5}
+@media(max-width:480px){.training-screen{padding:8px 0}.training-board{margin:9px auto}.training-actions button{min-height:44px}}
+@media(prefers-reduced-motion:reduce){.training-card,.training-list button,.training-actions button{transition:none}}
