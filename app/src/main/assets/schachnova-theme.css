@@ -908,3 +908,10 @@ button:not(:disabled){touch-action:manipulation}
 #gameScreen .boardrow{min-width:0}
 #gameScreen .board{border-radius:3px;box-shadow:0 0 0 3px #0d1b2e,0 10px 25px #0008}
 @media(max-width:420px){#gameScreen .boardpanel{padding:6px;gap:7px}#gameScreen .local-player-bar{min-height:50px;padding:5px 7px;gap:7px}#gameScreen .local-player-icon{width:34px;height:34px;flex-basis:34px}#gameScreen .local-player-bar strong{min-width:75px;padding:6px}}
+
+
+/* Face-to-face local chess: fixed board, turn-facing pieces only. */
+#gameScreen.local-face-to-face #board .piece-img{transition:transform .24s ease}
+#gameScreen.local-face-to-face.local-black-to-move #board .piece-img{transform:rotate(180deg)}
+#gameScreen.local-face-to-face.local-black-to-move #board .blind-disk{transform:rotate(180deg)}
+@media(prefers-reduced-motion:reduce){#gameScreen.local-face-to-face #board .piece-img{transition:none}}
