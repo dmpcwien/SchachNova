@@ -65,6 +65,8 @@ jobs:
           node --check app/src/main/assets/training.js
       - name: Run chess rule regression tests
         run: node tests/chess-rules.test.cjs
+      - name: Run variant move regression tests
+        run: node tests/variant-moves.test.cjs
       - name: Run variant integration regression tests
         run: node tests/variant-integration.test.cjs
       - name: Build debug APK
