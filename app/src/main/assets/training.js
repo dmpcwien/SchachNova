@@ -107,6 +107,7 @@ function animateTrainingMove(m,piece){
 }
 function applyTrainingMove(m){const piece=state.b[m[0]];state=apply(state,m);renderTraining();return animateTrainingMove(m,piece);}
 function endgameResult(){
+ if(!active||active.opening)return "";
  const moves=legal(state);
  if(!moves.length)return checked(state)?(state.t===-1?"Übung geschafft: Schwarz ist schachmatt.":"Übung verloren: Weiß ist schachmatt."):"Übung beendet: Patt – kein Sieg möglich.";
  if(insufficient(state))return "Übung beendet: Remis wegen unzureichenden Materials – das Trainingsziel ist nicht mehr erreichbar.";
