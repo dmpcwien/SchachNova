@@ -160,7 +160,7 @@ function animateMovedPiece(m){
  board.style.position="relative";board.append(overlay);target.style.visibility="hidden";
  const dx=tr.left-fr.left,dy=tr.top-fr.top;
  const distance=Math.hypot(toCol-fromCol,toRow-fromRow);
- const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+ const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
  const duration=reducedMotion?0:isBlindDisk?Math.min(420,Math.max(200,175+distance*30)):Math.min(410,Math.max(190,175+distance*29));
  if(reducedMotion){overlay.remove();target.style.visibility="";return;}
  let done=false,animation;
