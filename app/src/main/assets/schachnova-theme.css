@@ -820,3 +820,30 @@ body[data-piece-skin="reference"] #board .sq.black-piece>.piece-img{filter:grays
   margin:0!important;
   padding:0!important;
 }
+
+
+/* SchachNova visual system 2026: calm midnight blue, silver, and restrained cyan. */
+:root{--bg:#091321;--edge:#314760;--muted:#aebfd2;--green:#3b8fb3;--nova-surface:#111f32;--nova-surface-raised:#182b43;--nova-accent:#79c8e9;--nova-text:#f0f5fc}
+html,body{background:radial-gradient(ellipse 110% 55% at 50% -12%,#254463 0%,#0c1b2e 48%,#08121f 100%) fixed;color:var(--nova-text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.header{border-color:#38516b}.logo{background:linear-gradient(145deg,#264766,#13263d);border-color:#6383a3;color:#e3effb;box-shadow:0 6px 22px #0006}.accent{color:#8fd8f3}
+.nova-hero,.turnpanel,.boardpanel,.history,.settings,.coach,.review-panel,.modal-box{background:linear-gradient(155deg,#192d45,#101d30)!important;border:1px solid #38516c!important;box-shadow:0 8px 28px #02091455,inset 0 1px 0 #ffffff0b;border-radius:18px}
+.nova-premium-menu button,.nova-menu-grid button,.home-grid button,.side button,.simultan-card{background:linear-gradient(155deg,#203650,#12243b)!important;color:#edf5ff!important;border:1px solid #3a5774!important;border-radius:14px!important;box-shadow:inset 0 1px 0 #ffffff10,0 4px 14px #0002;transition:background-color .16s ease,border-color .16s ease,transform .16s ease}
+.nova-premium-menu button:active,.nova-menu-grid button:active,.home-grid button:active,.side button:active{transform:scale(.985)}
+.nova-premium-menu button:focus-visible,.side button:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid #8bd9f7;outline-offset:2px}
+.side button.primary,.simultan-card.active{background:linear-gradient(140deg,#276b98,#1a446b)!important;border-color:#8bd9f7!important}
+.settings select,.nova-design-picker select,input,textarea,select{background-color:#172b42;color:#f0f6ff;border-color:#466481;border-radius:10px}
+.sub,.footer,.history p,.ranks,.files{color:#afc4da}
+.board{border:2px solid #64819b;border-radius:9px;box-shadow:0 0 0 5px #0d1b2e,0 13px 30px #0008;isolation:isolate}
+.board .sq.light{background:#dce8ef}.board .sq.dark{background:#6e8ba7}
+.board .sq.lastmove{background:#a4bfd1!important}.board .sq.selected{box-shadow:inset 0 0 0 4px #f0cf7c}.board .sq.target{box-shadow:inset 0 0 0 4px #2b789c}
+.piece-img,.simultan-piece{object-fit:contain;image-rendering:auto;filter:drop-shadow(0 2px 1px #0008) drop-shadow(0 1px 3px #0005);backface-visibility:hidden}
+.board .piece-img{width:94%;height:94%}
+#simultanPanel .simultan-board{border:2px solid #6687a4!important;border-radius:8px;box-shadow:0 10px 28px #0007}
+#simultanPanel .simultan-square.light{background:#dce8ef}#simultanPanel .simultan-square.dark{background:#6e8ba7}
+#simultanPanel .simultan-square.in-check{background:#db394b!important;box-shadow:inset 0 0 0 3px #ffd4d8!important}
+#simultanPanel .simultan-card.active{box-shadow:inset 0 0 0 1px #8bd9f7,0 0 14px #267caa55}
+.coach{color:#f2f7ff!important;background:linear-gradient(145deg,#1d3a57,#152840)!important;border-color:#557b9c!important}
+.coach:before{content:"✦";display:inline-block;margin-right:6px;color:#f1d28b}
+.modal-box h2,.review-panel h2,.history h2{letter-spacing:-.025em;color:#f6f9ff}
+.modal-box p,.review-panel p{line-height:1.55}
+@media(prefers-reduced-motion:reduce){.nova-premium-menu button,.nova-menu-grid button,.home-grid button,.side button{transition:none}}
