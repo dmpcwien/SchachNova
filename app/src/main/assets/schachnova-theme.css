@@ -890,3 +890,21 @@ button:not(:disabled){touch-action:manipulation}
 #trainingScreen p,#trainingScreen small{line-height:1.5}
 @media(max-width:480px){.training-screen{padding:8px 0}.training-board{margin:9px auto}.training-actions button{min-height:44px}}
 @media(prefers-reduced-motion:reduce){.training-card,.training-list button,.training-actions button{transition:none}}
+
+
+/* Play in Person inspired local match layout: players above/below the board. */
+#gameScreen .boardpanel{display:flex;flex-direction:column;gap:9px;padding:10px}
+#gameScreen .local-player-bar{display:flex;align-items:center;gap:10px;min-height:58px;padding:8px 11px;background:linear-gradient(145deg,#1c3049,#101e31);border:1px solid #405d79;border-radius:13px}
+#gameScreen .local-player-top{order:0}
+#gameScreen .boardrow{order:1}
+#gameScreen .files{order:2;margin-top:-7px}
+#gameScreen .local-player-bottom{order:3}
+#gameScreen .local-player-icon{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border-radius:10px;background:#dce8ef;color:#253d57;font-size:27px;box-shadow:inset 0 1px 0 #fff8}
+#gameScreen .local-player-top .local-player-icon{background:#273548;color:#e4edf5}
+#gameScreen .local-player-name{display:flex;flex:1;flex-direction:column;gap:1px;font-weight:750;font-size:15px;min-width:0}
+#gameScreen .local-player-name small{color:#afc3d7;font-size:11px;font-weight:500}
+#gameScreen .local-player-bar strong{font-size:clamp(18px,5vw,25px);font-variant-numeric:tabular-nums;background:#081523;border:1px solid #425d76;border-radius:10px;padding:7px 11px;min-width:88px;text-align:center}
+#gameScreen .local-player-bottom strong{background:#e4edf5;color:#15273b;border-color:#c8dbe9}
+#gameScreen .boardrow{min-width:0}
+#gameScreen .board{border-radius:3px;box-shadow:0 0 0 3px #0d1b2e,0 10px 25px #0008}
+@media(max-width:420px){#gameScreen .boardpanel{padding:6px;gap:7px}#gameScreen .local-player-bar{min-height:50px;padding:5px 7px;gap:7px}#gameScreen .local-player-icon{width:34px;height:34px;flex-basis:34px}#gameScreen .local-player-bar strong{min-width:75px;padding:6px}}
