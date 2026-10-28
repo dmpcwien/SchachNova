@@ -21,4 +21,9 @@ for(const mode of ["torpedo","berolina","hoppelpoppel"]){
   evaluate(mode,`const s=${JSON.stringify(base(b))};const bm=legal(s).filter(m=>m[0]===82);const nm=legal(s).filter(m=>m[0]===83);if(!bm.some(m=>m[1]===49))throw Error("Hoppel bishop must leap like knight");if(!nm.some(m=>m[1]===66))throw Error("Hoppel knight must slide diagonally");`);
  }
 }
-console.log("SchachNova: pawn and Hoppel-Poppel move tests passed");
+{
+ const b=empty();b[116]="K";b[4]="k";b[16]="P";
+ evaluate("antichess",`const s=${JSON.stringify(base(b))};const promotions=legal(s).filter(m=>m[0]===16&&m[1]===0).map(m=>m[2]);if(!["q","r","b","n","k"].every(p=>promotions.includes(p)))throw Error("Antichess must allow all five promotion pieces including king");`);
+ evaluate("standard",`const s=${JSON.stringify(base(b))};const promotions=legal(s).filter(m=>m[0]===16&&m[1]===0).map(m=>m[2]);if(promotions.includes("k"))throw Error("Standard chess must prohibit king promotion");`);
+}
+console.log("SchachNova: variant moves and promotion tests passed");
