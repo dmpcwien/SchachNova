@@ -915,3 +915,16 @@ button:not(:disabled){touch-action:manipulation}
 #gameScreen.local-face-to-face.local-black-to-move #board .piece-img{transform:rotate(180deg)}
 #gameScreen.local-face-to-face.local-black-to-move #board .blind-disk{transform:rotate(180deg)}
 @media(prefers-reduced-motion:reduce){#gameScreen.local-face-to-face #board .piece-img{transition:none}}
+
+
+/* Local two-player fullscreen: board stays fixed, only its viewing area expands. */
+#gameScreen .local-fullscreen-toggle{border:1px solid #7a9fc3;background:#1b3854;color:#f4f8ff;border-radius:12px;padding:9px 12px;font-weight:750;white-space:nowrap}
+#gameScreen.local-board-fullscreen{position:fixed!important;inset:0!important;z-index:99999!important;overflow:auto!important;background:#091727!important;padding:8px!important;box-sizing:border-box}
+#gameScreen.local-board-fullscreen .backhome,#gameScreen.local-board-fullscreen .side,#gameScreen.local-board-fullscreen .premove-actions,#gameScreen.local-board-fullscreen #liveCoachPanel{display:none!important}
+#gameScreen.local-board-fullscreen .headline{display:flex!important;justify-content:flex-end!important;gap:8px;margin:0 0 5px!important}
+#gameScreen.local-board-fullscreen .headline .turnpanel,#gameScreen.local-board-fullscreen .headline #coachButton{display:none!important}
+#gameScreen.local-board-fullscreen .game{display:block!important;width:100%!important;max-width:100%!important;margin:0 auto!important;padding:0!important}
+#gameScreen.local-board-fullscreen .boardpanel{width:min(100%,calc(100dvh - 175px + 30vw))!important;max-width:640px!important;margin:0 auto!important;padding:4px!important}
+#gameScreen.local-board-fullscreen .boardrow{width:100%!important}
+#gameScreen.local-board-fullscreen .local-player-bar{min-height:43px!important}
+@media(orientation:landscape){#gameScreen.local-board-fullscreen .boardpanel{max-width:min(80dvh,680px)!important}}
