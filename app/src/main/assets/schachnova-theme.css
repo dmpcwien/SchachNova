@@ -928,3 +928,5 @@ button:not(:disabled){touch-action:manipulation}
 #gameScreen.local-board-fullscreen .boardrow{width:100%!important}
 #gameScreen.local-board-fullscreen .local-player-bar{min-height:43px!important}
 @media(orientation:landscape){#gameScreen.local-board-fullscreen .boardpanel{max-width:min(80dvh,680px)!important}}
+
+#gameScreen .local-rotation-toggle{border:1px solid #7a9fc3;background:#17324c;color:#eef6ff;border-radius:9px;padding:7px 9px;font-size:12px;font-weight:750;white-space:nowrap}#gameScreen .local-rotation-toggle[aria-pressed="false"]{background:#263341;color:#b9c5d1;border-color:#516478}#gameScreen .local-rotation-toggle[hidden]{display:none!important}#gameScreen .local-fullscreen-toggle[hidden]{display:none!important}
