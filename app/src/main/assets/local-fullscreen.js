@@ -19,7 +19,6 @@ rotationButton?.addEventListener("click",()=>{
  rotationEnabled=!rotationEnabled;
  window.SchachNovaLocalPieceRotationEnabled=rotationEnabled;
  try{localStorage.setItem("schachnova.localPieceRotation",rotationEnabled?"on":"off");}catch(_){}
- game.classList.toggle("local-black-to-move",rotationEnabled&&game.classList.contains("local-black-to-move"));
  window.SchachNovaLocalPieceRotationRefresh?.();
  syncRotation();
 });
@@ -38,9 +37,9 @@ button.addEventListener("click",()=>{
  if(!local())return;
  game.classList.toggle("local-board-fullscreen");
  sync();
- window.dispatchEvent(new Event("resize"));
+ requestAnimationFrame(()=>window.dispatchEvent(new Event("resize")));
 });
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&game.classList.contains("local-board-fullscreen")){game.classList.remove("local-board-fullscreen");sync();}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&game.classList.contains("local-board-fullscreen")){game.classList.remove("local-board-fullscreen");sync();window.dispatchEvent(new Event("resize"));}});
 const observer=new MutationObserver(sync);
 observer.observe(game,{attributes:true,attributeFilter:["hidden"]});
 const mode=document.getElementById("botMode");
