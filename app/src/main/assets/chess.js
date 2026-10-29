@@ -252,4 +252,5 @@ function setBlindLevel(v){blindLevel=Math.max(0,Math.min(5,Number(v)||0));render
 
 function claimDraw(){const reason=drawClaimReason();if(!reason||ended)return;ended="Remis – "+reason+" beansprucht";running=false;render();saveGame();}
 function agreeDraw(){if(ended||document.getElementById("botMode").value!=="human")return;if(!confirm("Stimmen beide Spieler einem Remis zu?"))return;ended="Remis durch Vereinbarung";running=false;render();saveGame();}
-\nwindow.SchachNovaLocalPieceRotationRefresh=()=>{const g=document.getElementById("gameScreen");if(g)g.classList.toggle("local-black-to-move",g.classList.contains("local-face-to-face")&&window.SchachNovaLocalPieceRotationEnabled!==false&&g.dataset.localSideToMove==="black");};\n
+
+window.SchachNovaLocalPieceRotationRefresh=()=>{const g=document.getElementById("gameScreen");if(g)g.classList.toggle("local-black-to-move",g.classList.contains("local-face-to-face")&&window.SchachNovaLocalPieceRotationEnabled!==false&&g.dataset.localSideToMove==="black");};
