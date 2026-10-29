@@ -2,10 +2,32 @@
 "use strict";
 const game=document.getElementById("gameScreen"),button=document.getElementById("localFullscreenToggle");
 if(!game||!button)return;
+const rotationButton=document.getElementById("localPieceRotationToggle");
+let rotationEnabled=true;
+try{rotationEnabled=localStorage.getItem("schachnova.localPieceRotation")!=="off";}catch(_){}
+window.SchachNovaLocalPieceRotationEnabled=rotationEnabled;
+function syncRotation(){
+ if(!rotationButton)return;
+ rotationButton.hidden=!local();
+ rotationButton.textContent=rotationEnabled?"↻ 180° AN":"↻ 180° AUS";
+ rotationButton.setAttribute("aria-pressed",String(rotationEnabled));
+ rotationButton.setAttribute("aria-label",rotationEnabled?"Figurendrehung ausschalten":"Figurendrehung einschalten");
+ rotationButton.title="Automatische Figurendrehung nach jedem Zug "+(rotationEnabled?"ausschalten":"einschalten");
+ game.classList.toggle("local-black-to-move",local()&&rotationEnabled&&game.classList.contains("local-face-to-face")&&game.dataset.localSideToMove==="black");
+}
+rotationButton?.addEventListener("click",()=>{
+ rotationEnabled=!rotationEnabled;
+ window.SchachNovaLocalPieceRotationEnabled=rotationEnabled;
+ try{localStorage.setItem("schachnova.localPieceRotation",rotationEnabled?"on":"off");}catch(_){}
+ game.classList.toggle("local-black-to-move",rotationEnabled&&game.classList.contains("local-black-to-move"));
+ window.SchachNovaLocalPieceRotationRefresh?.();
+ syncRotation();
+});
 function local(){return !game.hidden&&document.getElementById("botMode")?.value==="human";}
 function sync(){
  const allowed=local();
  button.hidden=!allowed;
+ syncRotation();
  if(!allowed)game.classList.remove("local-board-fullscreen");
  const on=allowed&&game.classList.contains("local-board-fullscreen");
  button.textContent=on?"⤢ Schließen":"⛶ Vollbild";
