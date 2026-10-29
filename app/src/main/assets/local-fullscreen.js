@@ -23,11 +23,18 @@ rotationButton?.addEventListener("click",()=>{
  syncRotation();
 });
 function local(){return !game.hidden&&document.getElementById("botMode")?.value==="human";}
+function resizeBoard(){requestAnimationFrame(()=>window.dispatchEvent(new Event("resize")));}
+function closeFullscreen(){
+ if(!game.classList.contains("local-board-fullscreen"))return;
+ game.classList.remove("local-board-fullscreen");
+ sync();
+ resizeBoard();
+}
 function sync(){
  const allowed=local();
  button.hidden=!allowed;
  syncRotation();
- if(!allowed)game.classList.remove("local-board-fullscreen");
+ if(!allowed&&game.classList.contains("local-board-fullscreen")){game.classList.remove("local-board-fullscreen");resizeBoard();}
  const on=allowed&&game.classList.contains("local-board-fullscreen");
  button.textContent=on?"⤢ Schließen":"⛶ Vollbild";
  button.setAttribute("aria-pressed",String(on));
@@ -37,14 +44,14 @@ button.addEventListener("click",()=>{
  if(!local())return;
  game.classList.toggle("local-board-fullscreen");
  sync();
- requestAnimationFrame(()=>window.dispatchEvent(new Event("resize")));
+ resizeBoard();
 });
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&game.classList.contains("local-board-fullscreen")){game.classList.remove("local-board-fullscreen");sync();window.dispatchEvent(new Event("resize"));}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&game.classList.contains("local-board-fullscreen")){closeFullscreen();}});
 const observer=new MutationObserver(sync);
 observer.observe(game,{attributes:true,attributeFilter:["hidden"]});
 const mode=document.getElementById("botMode");
 if(mode){mode.addEventListener("change",sync);new MutationObserver(sync).observe(mode,{attributes:true,attributeFilter:["value"]});}
-document.getElementById("backHome")?.addEventListener("click",()=>{game.classList.remove("local-board-fullscreen");sync();});
+document.getElementById("backHome")?.addEventListener("click",()=>{closeFullscreen();});
 sync();
-window.SchachNovaLocalFullscreen={close(){game.classList.remove("local-board-fullscreen");sync();},sync};
+window.SchachNovaLocalFullscreen={close:closeFullscreen,sync};
 })();
