@@ -106,7 +106,7 @@ function maybePlay(){
  if(mode!=="bot"||current().t!==botSide()||ended||viewIndex!==history.length-1)return;
  if(variantMode!=="standard"){
   if(variantMode==="torpedo"){playTorpedoBot();return;}
-  if(window.SchachNovaVariants?.[variantMode]?.botEngine==="local"){playVariantFallback();return;}
+  if(window.SchachNovaVariants?.[variantMode]?.botEngine==="local"){setInfo("⚠ Für "+(window.SchachNovaVariants[variantMode]?.label||variantMode)+" ist keine kompatible Fairy-Engine konfiguriert. Lokaler Ersatzgegner aktiv.");playVariantFallback();return;}
   if(window.SchachNovaVariants?.[variantMode]?.bot===false){setInfo("Für diese Variante ist nur das lokale Spiel zu zweit freigegeben");return;}
   if(!fairy){setInfo("Fairy-Stockfish nicht verfügbar – lokaler Ersatzgegner");playVariantFallback();return;}
   if(!fairyRequested){fairyRequested=true;try{fairy.start();watchFairy("Start");}catch(e){fairyRequested=false;setInfo("⚠ Engine-Start fehlgeschlagen. Notfallmodus: lokaler Ersatzgegner.");playVariantFallback();}return;}
