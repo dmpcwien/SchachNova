@@ -59,9 +59,10 @@ function enable(value){
  panel.hidden=!enabled;
  if(!enabled){shutdown();return;}
  if(variantMode!=="standard"){say("Der Live-Coach unterstützt derzeit klassisches Schach.");return;}
- say("Ich beobachte deine Züge. Nach jedem Zug erkläre ich auf Deutsch, was gut war und was du verbessern kannst.");
+ say("Coach aktiv. Prüfe vor jedem Zug Schachgebote, ungedeckte Figuren und Drohungen. Nach deinem Zug analysiere ich die Stellung.");
 }
 toggle.onclick=()=>enable(!enabled);
+window.SchachNovaLiveCoach={enable,isEnabled:()=>enabled};
 const baseMove=move;
 move=function(m){
  const before=current(),previous=movesPlayed.length;
