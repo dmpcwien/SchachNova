@@ -8,7 +8,7 @@ window.SchachNovaVariants=Object.freeze({
  standard:{label:"Klassisch",uci:"chess",local:true},
  hill:{label:"King of the Hill",uci:"kingofthehill",local:true},
  threecheck:{label:"Drei-Schach",uci:"3check",local:true},
- fivecheck:{label:"Fünf-Schach",uci:"5check",local:true,bot:false},
+ fivecheck:{label:"Fünf-Schach",uci:null,local:true,bot:true,botEngine:"local"},
  hoppelpoppel:{label:"Hoppel-Poppel",uci:null,local:true,bot:false},
  torpedo:{label:"Torpedo-Schach",uci:null,local:true,bot:true,botEngine:"local"},
  nocastling:{label:"Schach ohne Rochade",uci:null,local:true,bot:false},
