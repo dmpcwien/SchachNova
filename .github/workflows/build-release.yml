@@ -86,24 +86,8 @@ jobs:
       - name: Check all JavaScript sources
         run: |
           find app/src/main/assets -maxdepth 1 -name '*.js' ! -name 'stockfish-19-lite-single.js' ! -name 'fairy-stockfish.js' -print0 | xargs -0 -n1 node --check
-      - name: Run chess regression tests
-        run: |
-          node tests/chess-rules.test.cjs
-          node tests/variant-integration.test.cjs
-          node tests/engine-recovery.test.cjs
-          node tests/variant-moves.test.cjs
-          node tests/torpedo-regression.test.cjs
-          node tests/animation-regression.test.cjs
-          node tests/integration-regression.test.cjs
-          node tests/simultan-regression.test.cjs
-          node tests/board-geometry.test.cjs
-          node tests/rectangular-rules.test.cjs
-          node tests/rectangular-legality.test.cjs
-          node tests/rectangular-special-moves.test.cjs
-          node tests/rectangular-castling.test.cjs
-          node tests/rectangular-preview.test.cjs
-          node tests/memory-check-legality.test.cjs
-          node tests/endgame-result.test.cjs
+      - name: Run full chess regression suite
+        run: bash scripts/run-tests.sh
       - name: Synchronize visible version with Android versionName
         run: |
           set -euo pipefail
