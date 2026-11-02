@@ -13,11 +13,19 @@ assert.match(js,/function animateMove\(g,m\)/,"Simultan moves must animate");
 assert.match(js,/simultan-motion-overlay/,"Animation must use a dedicated overlay");
 assert.match(js,/sprite\.animate/,"Moved figure must animate as overlay sprite");
 assert.match(js,/function autoNext\(g,delay=2000\)/,"White must wait two seconds after bot");
-assert.match(js,/g\.humanColor===-1\?450:2450/,"Black switches after animation, white two seconds after animation");
-assert.match(js,/\(g\.humanColor===1&&isBot\)\|\|\(g\.humanColor===-1&&!isBot\)/,"White switches after bot, black after human");
-assert.match(js,/const next=\(active\+1\)%games\.length/,"Automatic switch must follow fixed numeric board order");
+assert.match(js,/autoNext\(g,isBot\?2000:450\)/,"White bot move remains visible for two seconds; black human move switches after animation");
+assert.match(js,/const shouldSwitch=shouldSwitchAfterMove\(g,isBot\)/,"Rotation must use color-aware rules");
+const vm=require("node:vm");
+const policy=js.match(/function shouldSwitchAfterMove\(g,isBot\)\{[^}]+\}/)?.[0];
+assert.ok(policy,"Switch policy must be testable");
+const shouldSwitchAfterMove=vm.runInNewContext("("+policy+")");
+for(const [humanColor,isBot,finished,expected] of [
+ [1,false,"",false], [1,true,"",true],[-1,false,"",true],[-1,true,"",false],
+ [1,false,"Schachmatt",true],[-1,true,"Schachmatt",true]
+]) assert.equal(shouldSwitchAfterMove({humanColor,finished},isBot),expected,"Unexpected switching policy");
+assert.match(js,/nextPlayable\(\(active\+1\)%games\.length\)/,"Switching follows board order and skips finished games");
 assert.match(js,/g\.awaitingSwitch\|\|state\(g\)\.t!==g\.humanColor/,"Block second human move while switching");
-assert.match(js,/g\.awaitingSwitch=true;autoNext/,"Lock board when automatic switch is scheduled");
+assert.match(js,/g\.awaitingSwitch=true;drawCards\(\);autoNext\(g,/,"Lock the board before switching");
 assert.match(js,/document\.getElementById\("vibrationToggle"\)/,"Respect normal-board vibration setting");
 assert.match(js,/window\.AndroidHaptics\.vibrate\(pattern\.join\(","\)\)/,"Use Android haptics bridge");
 assert.match(js,/navigator\.vibrate\(pattern\)/,"Fallback to web vibration");
@@ -25,9 +33,9 @@ assert.match(js,/isMate\?\[65,85,65\]:isCheck\?\[160,65,80\]:capture\?\[110\]:\[
 assert.match(js,/feedbackForMove\(s,nextState,valid\)/,"Trigger vibration for human and bot moves");
 assert.match(js,/previous\.awaitingSwitch=false/,"Manual board navigation must release old switch lock");
 assert.match(js,/games\[active\]\.awaitingSwitch=false/,"Returning to a board must release stale switch lock");
-assert.match(js,/if\(games\[active\]===g&&\(\(g\.humanColor===1&&isBot\)/,"Background bot move must not lock an inactive board");
+assert.match(js,/if\(games\[active\]===g\)\{const shouldSwitch=/,"Background bot moves must not lock inactive boards");
 assert.match(js,/aria-pressed/,"Board square selection must be accessible");
-assert.match(js,/\|\|g\.finished\)\)\{g\.awaitingSwitch=true;autoNext/,"Finished game must not stall fixed board rotation");
+assert.match(js,/Boolean\(g\.finished\)/,"Completed games must also allow rotation");
 assert.match(js,/autoNext\(g,1200\)/,"Bot with no legal moves must advance to next board");
 assert.match(js,/board\.addEventListener\("pointerdown"/,"Drag gesture must support pointer start");
 assert.match(js,/board\.addEventListener\("pointerup"/,"Drag gesture must support pointer release");
