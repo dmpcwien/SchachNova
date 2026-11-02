@@ -68,6 +68,10 @@ move=function(m){
  const before=current(),previous=movesPlayed.length;
  baseMove(m);
  if(!enabled||variantMode!=="standard"||movesPlayed.length!==previous+1)return;
+ // Only critique the human player's own decision. A delayed computer response
+ // must not cancel and replace the still-running analysis of the human move.
+ const botColor=window.schachNovaBotColor===1?1:-1;
+ if($("botMode")?.value==="bot"&&before.t===botColor)return;
  shutdown();
  task={states:[before,current()],move:uci(m),color:before.t,before:null,after:null};
  say("Zug "+uci(m)+" – Stockfish prüft deine Entscheidung …");
