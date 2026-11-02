@@ -13,17 +13,18 @@ assert.match(chess,/\["standard","hill","threecheck","fivecheck","hoppelpoppel",
 assert.match(chess,/if\(variantMode==="atomic"\)\{const outcome=status\(\)/,"Finished atomic game must restore its result");
 assert.match(bridge,/SchachNovaVariants\?\.\[variantMode\]\?\.bot===false/,"Engine bridge must enforce unsupported variant bots");
 assert.match(bridge,/if\(variantMode!=="standard"\)\{setInfo\("Stockfish-Analyse für diese Variante noch nicht freigegeben"\)/,"Standard Stockfish analysis must reject variants");
-assert.match(bridge,/coachEnabled&&variantMode==="standard"/,"Standard Stockfish coach must not analyze special variants");
+assert.doesNotMatch(bridge,/coachEnabled&&variantMode==="standard"/,"Duplicate Coach analysis must not be started by bot transport");
+assert.match(bridge,/dedicated live-coach\.js owns the Coach button/,"Only the Live-Coach owns its toggle");
 const fairy=fs.readFileSync("app/src/main/assets/fairy-bridge.js","utf8");
 assert.match(fairy,/ready=false;awaitingReady=true;for\(const cmd/,"Fairy must await variant configuration");
-assert.match(bridge,/fairy\.configure\(variantMode\);fairyVariant=variantMode;return;/,"Variant search must wait for readyok");
+assert.match(bridge,/fairy\.configure\(variantMode\);fairyVariant=variantMode;watchFairy\("Konfiguration"\);return;/,"Variant search must wait for readyok (with watchdog)");
 assert.match(fairy,/for\(const cmd of window\.schachNovaVariantUciOptions\(name\)\)post\(cmd\);post\("isready"\);/,"Fairy must explicitly request readyok after variant options");
 assert.match(fairy,/const completed=request;request=null;if\(completed&&uciMove\(move\)\)notify\("bestmove"/,"Fairy request must be cleared before notifying listeners");
-assert.match(bridge,/catch\(e\)\{fairyRequested=false;setInfo\("Fairy-Stockfish-Start fehlgeschlagen:/,"Fairy startup failure must permit retry");
-assert.match(bridge,/if\(event.type==="error"\)\{fairyReady=false;fairyVariant=null;/,"Fairy errors must invalidate variant state");
-assert.match(fairy,/worker.onerror=e=>\{const failed=worker;worker=null;/,"Fairy worker errors must release failed worker");
+assert.match(bridge,/catch\(e\)\{fairyRequested=false;fairyFaulted=true;setInfo\("⚠ Engine-Start fehlgeschlagen\. Notfallmodus: lokaler Ersatzgegner\."\);playVariantFallback\(\);\}/,"Fairy startup failure must permit retry and fall back to the local opponent");
+assert.match(bridge,/if\(event\.type==="error"\)\{clearFairyWatchdog\(\);fairyReady=false;fairyVariant=null;/,"Fairy errors must invalidate variant state");
+assert.match(fairy,/worker.onerror=e=>\{if\(!worker\)return;const failed=worker;worker=null;/,"Fairy worker errors must release failed worker");
 assert.match(fairy,/failed\.terminate\(\)/,"Failed Fairy worker must be terminated");
-assert.match(bridge,/worker.onerror=\(\)=>\{const failed=worker;worker=null;/,"Classical Stockfish must release failed worker");
+assert.match(bridge,/engine.onerror=\(\)=>\{if\(worker===engine\)standardFailure/,"Classical Stockfish must recover from worker failures");
 assert.match(bridge,/botPosition=movesPlayed\.map\(notation\)\.join\(" "\)/,"Classical bot must snapshot position");
 assert.match(bridge,/if\(expected!==movesPlayed\.map\(notation\)\.join\(" "\)\)return;/,"Classical bot must reject stale result");
 assert.match(fairy,/catch\(e\)\{if\(worker\)\{try\{worker\.terminate\(\);\}/,"Fairy startup exception must terminate worker");
@@ -56,7 +57,7 @@ assert.match(review,/variant\?"fairy-stockfish\.js":"stockfish-19-lite-single\.j
 assert.match(review,/Fairy-Stockfish init error/,"Review must surface missing engine assets");
 console.log("SchachNova: all documented variant statuses and analysis routing checked");
 
-assert.match(html,/<option value="fivecheck">Fünf-Schach \(lokal, 2 Spieler\)<\/option>/,"Five-check must be selectable");
+assert.match(html,/<option value="fivecheck">Fünf-Schach \(lokaler Computergegner\)<\/option>/,"Five-check local bot must be labeled correctly");
 assert.match(chess,/variantMode==="fivecheck"\?5:3/,"Five-check must end after five checks");
 
 assert.match(html,/<option value="hoppelpoppel">Hoppel-Poppel \(lokal, 2 Spieler\)<\/option>/);
