@@ -45,7 +45,11 @@ for(const item of documented){
  assert.equal(status.documented,true,item.id+" must remain documented");
  assert.equal(status.analysisEligible,Boolean(status.localRules&&status.engineConfigured),item.id+" cannot be marked ready without rules and engine");
 }
-for(const id of ["standard","hill","threecheck","fivecheck","antichess","atomic"]){
+// Five-check runs with local rules and a local computer opponent; Fairy UCI is not configured.
+assert.equal(context.window.SchachNovaVariantStatus("fivecheck").localRules,true,"Five-check local rules must remain enabled");
+assert.equal(context.window.SchachNovaVariantStatus("fivecheck").analysisEligible,false,"Five-check must not claim unavailable Fairy engine analysis");
+assert.equal(context.window.SchachNovaVariants.fivecheck.botEngine,"local","Five-check uses local opponent without Fairy");
+for(const id of ["standard","hill","threecheck","antichess","atomic"]){
  assert.equal(context.window.SchachNovaVariantStatus(id).analysisEligible,true,id+" must have a local rules/engine configuration");
 }
 for(const id of ["shogi","xiangqi","janggi","capablanca","crazyhouse","horde","racingkings"]){
