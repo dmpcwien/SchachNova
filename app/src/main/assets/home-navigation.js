@@ -12,6 +12,8 @@
   window.scrollTo({top:0,behavior:'smooth'});
  }
  function openSettings(){
+  // The setup container is hidden in settings; move its design picker outside first.
+  if(picker.parentElement===setup&&setup.parentElement)setup.parentElement.insertBefore(picker,setup);
   home.classList.add('nova-submenu','nova-show-design');
   home.classList.remove('nova-setup-mode');
   setup.hidden=true;

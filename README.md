@@ -20,3 +20,11 @@ Siehe [Backup-Regeln](docs/BACKUP_POLICY.md).
 Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen Repository speichern.
 
 **Status:** Projektregeln vorhanden; noch keine spielbare Android-APK.
+
+
+## Updates aus Verbesserungs-ZIP (2026-11-02)
+
+- Moduswechsel ohne JavaScript-Shadowing-Fehler, auch für Varianten und Blindschach.
+- Design-Einstellungen bleiben sichtbar, auch wenn der vorherige Spiel-Setup-Container verborgen wird.
+- Sicherere WebView-Navigation, Android-Zurück mit Doppelbestätigung, bessere Touch-Fokusdarstellung.
+- Android-Version 1.0.2 (versionCode 4); Tests in `scripts/run-tests.sh`.

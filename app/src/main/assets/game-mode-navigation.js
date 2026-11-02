@@ -7,7 +7,7 @@ function chooseMode(value){
  if(value==='training'){if(typeof window.openSchachTraining==='function')window.openSchachTraining();else notice.textContent='Trainingsmenü konnte nicht geladen werden.';return;}
  if(value==='analysis'){document.getElementById('archiveOpen').click();return;}
  mode=value;
- const home=document.getElementById('homeScreen'),setup=document.getElementById('novaGameSetup');
+ const setup=document.getElementById('novaGameSetup');
  // Make the setup view exclusive: a selected mode must never leave the mode grid on top.
  for(const section of ['play','training','analysis','profile']){
   const element=document.getElementById('nova'+section[0].toUpperCase()+section.slice(1)+'Section');

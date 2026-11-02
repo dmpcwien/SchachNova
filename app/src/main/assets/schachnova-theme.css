@@ -930,3 +930,14 @@ button:not(:disabled){touch-action:manipulation}
 @media(orientation:landscape){#gameScreen.local-board-fullscreen .boardpanel{max-width:min(80dvh,680px)!important}}
 
 #gameScreen .local-rotation-toggle{border:1px solid #7a9fc3;background:#17324c;color:#eef6ff;border-radius:9px;padding:7px 9px;font-size:12px;font-weight:750;white-space:nowrap}#gameScreen .local-rotation-toggle[aria-pressed="false"]{background:#263341;color:#b9c5d1;border-color:#516478}#gameScreen .local-rotation-toggle[hidden]{display:none!important}#gameScreen .local-fullscreen-toggle[hidden]{display:none!important}
+
+/* ZIP-inspired additive accessibility and small-screen UI polish (2026-11-02). */
+html,body{background-repeat:no-repeat!important;min-height:100%}
+body{min-height:100dvh}
+button,select,summary,[role="button"],.nova-nav{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:focus-visible,select:focus-visible,input:focus-visible,[role="button"]:focus-visible,.nova-nav:focus-visible{outline:3px solid #8fd0ff;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+@media(forced-colors:active){button,select,.nova-nav{border:1px solid ButtonText}}
+#gameScreen .headline{flex-wrap:wrap;align-items:stretch;gap:8px}
+#gameScreen .headline .turnpanel{flex:1 1 100%;min-width:0;height:auto}
+#gameScreen .headline>button{flex:1 1 0;min-width:88px;min-height:44px;height:auto}
