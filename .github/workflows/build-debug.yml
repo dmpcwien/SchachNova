@@ -65,15 +65,8 @@ jobs:
           node --check app/src/main/assets/game-archive.js
           node --check app/src/main/assets/live-coach.js
           node --check app/src/main/assets/training.js
-      - name: Run chess rule regression tests
-        run: node tests/chess-rules.test.cjs
-      - name: Run variant move regression tests
-        run: node tests/variant-moves.test.cjs
-      - name: Run Torpedo pawn regression tests
-        run: node tests/torpedo-regression.test.cjs
-      - name: Run variant integration regression tests
-        run: node tests/variant-integration.test.cjs
-          node tests/engine-recovery.test.cjs
+      - name: Run full chess regression suite
+        run: bash scripts/run-tests.sh
       - name: Build debug APK
         run: gradle :app:assembleDebug --no-daemon
       - name: Generate checksum and source archive
