@@ -2,6 +2,8 @@
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
+const practice=window.SchachNovaPractice;
+let troubleSteps=new Set(),hintedSteps=new Set();
 const opening=[
  {id:"it",title:"Italienisch · Weiß",side:1,moves:["e2e4","e7e5","g1f3","b8c6","f1c4","g8f6","c2c3"],notes:["Besetze das Zentrum mit e4.","Schwarz antwortet symmetrisch.","Entwickle den Springer und greife e5 an.","Schwarz verteidigt e5.","Der Läufer blickt auf f7.","Schwarz entwickelt eine Figur.","c3 bereitet den Vorstoß d4 vor."]},
  {id:"rg",title:"Spanische Partie · Weiß",side:1,moves:["e2e4","e7e5","g1f3","b8c6","f1b5","a7a6","b5a4"],notes:["Kontrolliere das Zentrum.","Schwarz hält dagegen.","Greife e5 an.","Schwarz deckt e5.","Bb5 übt indirekt Druck auf e5 aus.","Schwarz fragt den Läufer.","Erhalte den Läufer und bleibe flexibel."]},
@@ -30,27 +32,46 @@ function posFen(s){let rows=[];for(let r=0;r<8;r++){let row="",n=0;for(let c=0;c
 function label(t){$("trainingMessage").textContent=t;}
 function stopWorker(){if(worker){worker.terminate();worker=null;}busy=false;}
 function showMenu(group){
+ updatePracticeDashboard();
  trainingFinished=false;stopWorker();active=null;$("trainingBoardArea").hidden=true;$("trainingList").hidden=false;
- const names={home:"🎯 Schachtraining",openings:"📚 Eröffnungen",e4:"1. e4 · Eröffnungen",d4:"1. d4 · Eröffnungen",other:"Andere Eröffnungen",endgames:"♟ Endspiele"};
+ const names={home:"🎯 Schachtraining",openings:"📚 Eröffnungen",e4:"1. e4 · Eröffnungen",d4:"1. d4 · Eröffnungen",other:"Andere Eröffnungen",endgames:"♟ Endspiele",review:"⏳ Heute wiederholen",favorites:"⭐ Mein Repertoire"};
  $("trainingTitle").textContent=names[group]||"Schachtraining";
  const root=$("trainingList");root.replaceChildren();
- const choices=group==="home"?[{title:"📚 Eröffnungen · Weiß und Schwarz",group:"openings"},{title:"♟ Endspiele",group:"endgames"}]:group==="openings"?[{title:"1. e4 · Eröffnungen",group:"e4"},{title:"1. d4 · Eröffnungen",group:"d4"},{title:"Andere Eröffnungen",group:"other"}]:group==="endgames"?ends:opening.filter(o=>o.group===group);
+ const choices=group==="home"?[{title:"⏳ Heute wiederholen",group:"review"},{title:"⭐ Mein Repertoire",group:"favorites"},{title:"📚 Eröffnungen · Weiß und Schwarz",group:"openings"},{title:"♟ Endspiele",group:"endgames"}]:group==="openings"?[{title:"1. e4 · Eröffnungen",group:"e4"},{title:"1. d4 · Eröffnungen",group:"d4"},{title:"Andere Eröffnungen",group:"other"}]:group==="endgames"?ends:group==="review"?(practice?.dueLines(opening).map(x=>x.line)||[]):group==="favorites"?opening.filter(o=>practice?.isFavorite(o)):opening.filter(o=>o.group===group).sort((a,b)=>(practice?.lineMetrics(b).due||0)-(practice?.lineMetrics(a).due||0));
+ if(!choices.length){const p=document.createElement("p");p.className="training-empty";p.textContent=group==="review"?"Keine Wiederholungen fällig. Trainiere eine Eröffnung, damit sie im Wiederholungsplan erscheint.":"Noch keine Favoriten. Tippe auf den Stern neben einer Eröffnung.";root.append(p);}
  for(const item of choices){
   const b=document.createElement("button");b.className="training-card";
-  if(item.group&&["openings","endgames","e4","d4","other"].includes(item.group)&&!item.moves){b.textContent=item.title;b.onclick=()=>showMenu(item.group);}
+  if(item.group&&["openings","endgames","e4","d4","other","review","favorites"].includes(item.group)&&!item.moves){b.textContent=item.title;b.onclick=()=>showMenu(item.group);}
   else {
    b.classList.add("training-opening-card");
    const icon=document.createElement("span");icon.className="training-thumb";icon.textContent="♟";
    const info=document.createElement("span");info.className="training-card-copy";
    const title=document.createElement("strong");title.textContent=item.title;
    const description=document.createElement("small");description.textContent=item.description||item.goal||"Interaktive Übung auf dem Schachbrett.";
+   if(item.moves&&practice){const m=practice.lineMetrics(item);description.textContent=(m.due?"⏳ "+m.due+" Züge fällig · ":"")+(m.practiced?"Lernstand "+Math.round(m.progress*100)+" % · "+m.mastery:"Neu · noch nicht trainiert");}
    info.append(title,description);b.append(icon,info);
-   b.onclick=()=>start(item,group!=="endgames");
+   b.onclick=()=>start(item,group!=="endgames",group);
   }
-  root.append(b);
+  if(item.moves&&practice){
+   const row=document.createElement("div");row.className="training-line-row";row.append(b);
+   const star=document.createElement("button");star.type="button";star.className="training-favorite";star.setAttribute("aria-label","Eröffnung als Favorit markieren");star.setAttribute("aria-pressed",String(practice.isFavorite(item)));star.textContent=practice.isFavorite(item)?"★":"☆";
+   star.onclick=()=>{const selected=practice.toggleFavorite(item);star.setAttribute("aria-pressed",String(selected));star.textContent=selected?"★":"☆";updatePracticeDashboard();if(group==="favorites"&&!selected)showMenu("favorites");};
+   row.append(star);root.append(row);
+  }else root.append(b);
  }
  $("trainingBack").onclick=()=>group==="home"?exit():showMenu(["e4","d4","other"].includes(group)?"openings":"home");
 }
+function updatePracticeDashboard(){
+ const panel=$("trainingDashboard");if(!panel||!practice)return;
+ const d=practice.summary(opening);panel.hidden=false;
+ $("practiceToday").textContent=d.today+" / "+d.goal+" Züge";
+ $("practiceStreak").textContent=d.streak+" Tage";
+ $("practiceDue").textContent=d.duePositions+" Züge";
+ $("practiceMastered").textContent=d.practiced+" / "+opening.length+" Eröffnungen begonnen";
+ $("practiceDailyBar").value=Math.min(100,Math.round(d.today/d.goal*100));
+ $("practiceGoalSelect").value=String(d.goal);
+}
+$("practiceGoalSelect")?.addEventListener("change",e=>{practice?.setGoal(Number(e.target.value));updatePracticeDashboard();});
 function exit(){trainingFinished=false;stopWorker();$("trainingScreen").hidden=true;$("homeScreen").hidden=false;active=null;if(previousVariantMode!==null){variantMode=previousVariantMode;previousVariantMode=null;}}
 let hintStep=0,hintFrom=-1,hintTo=-1;
 function resetHint(){hintStep=0;hintFrom=-1;hintTo=-1;}
@@ -116,7 +137,7 @@ function endgameResult(){
  if(active?.data.kind==="promotion"&&state.b.includes("Q"))return "Geschafft: Der Bauer wurde umgewandelt!";
  return "";
 }
-function finishTraining(message){trainingFinished=true;selected=-1;resetHint();stopWorker();label(message);renderTraining();}
+function finishTraining(message){trainingFinished=true;selected=-1;resetHint();stopWorker();label(message);renderTraining();updatePracticeDashboard();const next=$("trainingNextDue");if(next)next.hidden=!active?.opening||!practice?.dueLines(opening).length;}
 function animateHint(){
  const board=$("trainingBoard");if(!board||hintFrom<0)return;
  const flipped=active.opening&&active.data.side===-1;
@@ -150,12 +171,13 @@ function requestEndgameHint(){
   w.postMessage("uci");
  }catch(_){stopWorker();label("Stockfish-Hinweis derzeit nicht verfügbar.");}
 }
-function start(data,isOpening){
- stopWorker();if(previousVariantMode===null)previousVariantMode=variantMode;variantMode="standard";active={data,opening:isOpening};trainingFinished=false;ply=0;errors=0;selected=-1;resetHint();state=isOpening?initial():fenState(data.fen);
+function start(data,isOpening,sourceGroup){
+ stopWorker();if(previousVariantMode===null)previousVariantMode=variantMode;variantMode="standard";active={data,opening:isOpening,sourceGroup:sourceGroup||(isOpening?data.group:"endgames")};trainingFinished=false;ply=0;errors=0;selected=-1;troubleSteps=new Set();hintedSteps=new Set();resetHint();state=isOpening?initial():fenState(data.fen);
  $("trainingTitle").textContent=data.title;$("trainingList").hidden=true;$("trainingBoardArea").hidden=false;
- $("trainingBack").onclick=()=>showMenu(isOpening?data.group:"endgames");
- $("trainingReset").onclick=()=>start(data,isOpening);
- $("trainingHint").onclick=()=>{if(!active)return;let moveText=null;if(isOpening){moveText=data.moves[ply];}else{requestEndgameHint();return;}if(!moveText){label("Keine weiteren Züge verfügbar.");return;}const square=v=>(8-Number(v[1]))*16+"abcdefgh".indexOf(v[0]);hintStep=Math.min(2,hintStep+1);hintFrom=square(moveText.slice(0,2));hintTo=hintStep===2?square(moveText.slice(2,4)):-1;label(hintStep===1?"Hinweis 1/2: Die richtige Figur ist markiert.":"Hinweis 2/2: Das Zielfeld ist zusätzlich markiert.");renderTraining();animateHint();};
+ $("trainingBack").onclick=()=>showMenu(active?.sourceGroup||"home");
+ $("trainingReset").onclick=()=>start(data,isOpening,sourceGroup);
+ $("trainingHint").onclick=()=>{if(!active)return;let moveText=null;if(isOpening){moveText=data.moves[ply];}else{requestEndgameHint();return;}if(!moveText){label("Keine weiteren Züge verfügbar.");return;}hintedSteps.add(ply);const square=v=>(8-Number(v[1]))*16+"abcdefgh".indexOf(v[0]);hintStep=Math.min(2,hintStep+1);hintFrom=square(moveText.slice(0,2));hintTo=hintStep===2?square(moveText.slice(2,4)):-1;label(hintStep===1?"Hinweis 1/2: Die richtige Figur ist markiert.":"Hinweis 2/2: Das Zielfeld ist zusätzlich markiert.");renderTraining();animateHint();};
+ $("trainingNextDue").hidden=true;
  label(isOpening?"Übe die Eröffnung mit "+(data.side===1?"Weiß":"Schwarz")+". Ziehe die richtige Figur.":"Ziel: "+data.goal);
  renderTraining();if(isOpening)autoOpening();else{const outcome=endgameResult();if(outcome)finishTraining(outcome);}
 }
@@ -178,8 +200,8 @@ function click(i){
  if(!m){renderTraining();return;}
  if(active.opening){
   const expected=active.data.moves[ply];
-  if(uci(m)!==expected){errors++;label("Nicht die gesuchte Fortsetzung. Überlege, wie du das Zentrum kontrollierst und deine Figuren entwickelst. Tipp zeigt den erwarteten Zug.");renderTraining();return;}
-  resetHint();busy=true;applyTrainingMove(m).then(()=>{if(!active||trainingFinished)return;ply++;label("Richtig! "+active.data.notes[ply-1]);return autoOpening();}).finally(()=>{busy=false;});return;
+  if(uci(m)!==expected){errors++;if(!troubleSteps.has(ply)){troubleSteps.add(ply);practice?.noteMiss(active.data,ply);}label("Nicht die gesuchte Fortsetzung. Überlege, wie du das Zentrum kontrollierst und deine Figuren entwickelst. Tipp zeigt den erwarteten Zug.");renderTraining();return;}
+  resetHint();busy=true;applyTrainingMove(m).then(()=>{if(!active||trainingFinished)return;practice?.noteMove(active.data,ply,{hadMiss:troubleSteps.has(ply),hinted:hintedSteps.has(ply)});ply++;label("Richtig! "+(active.data.notes[ply-1]||"Gut gespielt."));updatePracticeDashboard();return autoOpening();}).finally(()=>{busy=false;});return;
  }
  resetHint();busy=true;applyTrainingMove(m).then(()=>{if(!active||trainingFinished)return;const outcome=endgameResult();if(outcome){finishTraining(outcome);return;}engineReply();}).catch(e=>{console.error("Endspielanimation:",e);label("Der Zug konnte nicht vollständig dargestellt werden.");}).finally(()=>{if(!worker)busy=false;});
 }
@@ -198,6 +220,7 @@ function engineReply(){
   w.postMessage("uci");
  }catch(e){stopWorker();label("Stockfish konnte nicht geladen werden.");}
 }
+$("trainingNextDue")?.addEventListener("click",()=>{const next=practice?.dueLines(opening)[0]?.line;if(next)start(next,true,"review");else showMenu("home");});
 $("trainingExit").onclick=exit;
 window.openSchachTraining=()=>{$("homeScreen").hidden=true;$("gameScreen").hidden=true;$("trainingScreen").hidden=false;showMenu("home");};
 })();
