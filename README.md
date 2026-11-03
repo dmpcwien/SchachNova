@@ -39,3 +39,12 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - Vorherige SchachNova-Optik, Figuren, Modi und Nutzerdaten bleiben erhalten.
 - Quellen und Lizenzen: [docs/THIRD_PARTY_ASSETS.md](docs/THIRD_PARTY_ASSETS.md).
 - Neuer Regressionstest: `tests/neo-assets.test.cjs`; APK erst nach erfolgreichem CI als getestet kennzeichnen.
+
+
+## Adaptives Eröffnungstraining (1.0.4)
+- Wiederholungsplan für eigene Eröffnungszüge nach 1/3/7/14/30/60/120 Tagen (je nach Lernstand).
+- Fehler und angeforderte Hinweise reduzieren den Lernfortschritt; korrekte Züge beim ersten Versuch verbessern ihn.
+- Tägliches Ziel (5–50 Züge), Lernserie und fällige Aufgaben; lokale Speicherung ohne Konto.
+- Favoriten als persönliches Repertoire, Eröffnungen nach fälligen Übungen priorisiert.
+- Klassisches Spiel, Varianten, Coaches und bisherige Daten bleiben erhalten.
+- Umsetzung inspiriert von [Lichess Neo](https://github.com/theophile-wallez/LichessNeo), MIT.
