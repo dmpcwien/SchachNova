@@ -2,7 +2,7 @@ plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
 android {
  namespace = "at.schachnova.app"
  compileSdk = 35
- defaultConfig { applicationId = "at.schachnova.app"; minSdk = 26; targetSdk = 35; versionCode = 4; versionName = "1.0.2" }
+ defaultConfig { applicationId = "at.schachnova.app"; minSdk = 26; targetSdk = 35; versionCode = 5; versionName = "1.0.3" }
  signingConfigs {
   create("secureRelease") {
    val keyFile = System.getenv("SCHACHNOVA_KEYSTORE_PATH")
