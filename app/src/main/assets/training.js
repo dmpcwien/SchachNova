@@ -37,11 +37,11 @@ function showMenu(group){
  const names={home:"🎯 Schachtraining",openings:"📚 Eröffnungen",e4:"1. e4 · Eröffnungen",d4:"1. d4 · Eröffnungen",other:"Andere Eröffnungen",endgames:"♟ Endspiele",review:"⏳ Heute wiederholen",favorites:"⭐ Mein Repertoire"};
  $("trainingTitle").textContent=names[group]||"Schachtraining";
  const root=$("trainingList");root.replaceChildren();
- const choices=group==="home"?[{title:"⏳ Heute wiederholen",group:"review"},{title:"⭐ Mein Repertoire",group:"favorites"},{title:"📚 Eröffnungen · Weiß und Schwarz",group:"openings"},{title:"♟ Endspiele",group:"endgames"}]:group==="openings"?[{title:"1. e4 · Eröffnungen",group:"e4"},{title:"1. d4 · Eröffnungen",group:"d4"},{title:"Andere Eröffnungen",group:"other"}]:group==="endgames"?ends:group==="review"?(practice?.dueLines(opening).map(x=>x.line)||[]):group==="favorites"?opening.filter(o=>practice?.isFavorite(o)):opening.filter(o=>o.group===group).sort((a,b)=>(practice?.lineMetrics(b).due||0)-(practice?.lineMetrics(a).due||0));
+ const choices=group==="home"?[{title:"⏳ Heute wiederholen",group:"review"},{title:"⭐ Mein Repertoire",group:"favorites"},{title:"📚 Eröffnungen · Weiß und Schwarz",group:"openings"},{title:"♟ Endspiele",group:"endgames"},{title:"🧭 Koordinatentrainer · 60 Sekunden",group:"coordinates"}]:group==="openings"?[{title:"1. e4 · Eröffnungen",group:"e4"},{title:"1. d4 · Eröffnungen",group:"d4"},{title:"Andere Eröffnungen",group:"other"}]:group==="endgames"?ends:group==="review"?(practice?.dueLines(opening).map(x=>x.line)||[]):group==="favorites"?opening.filter(o=>practice?.isFavorite(o)):opening.filter(o=>o.group===group).sort((a,b)=>(practice?.lineMetrics(b).due||0)-(practice?.lineMetrics(a).due||0));
  if(!choices.length){const p=document.createElement("p");p.className="training-empty";p.textContent=group==="review"?"Keine Wiederholungen fällig. Trainiere eine Eröffnung, damit sie im Wiederholungsplan erscheint.":"Noch keine Favoriten. Tippe auf den Stern neben einer Eröffnung.";root.append(p);}
  for(const item of choices){
   const b=document.createElement("button");b.className="training-card";
-  if(item.group&&["openings","endgames","e4","d4","other","review","favorites"].includes(item.group)&&!item.moves){b.textContent=item.title;b.onclick=()=>showMenu(item.group);}
+  if(item.group&&["openings","endgames","e4","d4","other","review","favorites","coordinates"].includes(item.group)&&!item.moves){b.textContent=item.title;b.onclick=()=>item.group==="coordinates"?window.SchachNovaCoordinates?.open():showMenu(item.group);}
   else {
    b.classList.add("training-opening-card");
    const icon=document.createElement("span");icon.className="training-thumb";icon.textContent="♟";

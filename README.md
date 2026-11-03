@@ -48,3 +48,10 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - Favoriten als persönliches Repertoire, Eröffnungen nach fälligen Übungen priorisiert.
 - Klassisches Spiel, Varianten, Coaches und bisherige Daten bleiben erhalten.
 - Umsetzung inspiriert von [Lichess Neo](https://github.com/theophile-wallez/LichessNeo), MIT.
+
+
+## Koordinatentrainer (1.0.5)
+- Zwei Offline-Modi: Lernen ohne Zeitdruck und 60-Sekunden-Challenge.
+- Brett drehen, Koordinaten bei Bedarf einblenden, Treffer-/Fehlerzählung.
+- Persönlicher 60-Sekunden-Bestwert wird lokal gespeichert, nur abgeschlossene Versuche zählen.
+- Keine zusätzlichen Menüreiter: erreichbar über Training, Android-Zurück führt zum Training.
