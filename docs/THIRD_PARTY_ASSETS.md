@@ -43,3 +43,9 @@ SOFTWARE.
 - Die App nutzt die unveränderte Tabelle mit linearer Interpolation; berechnete Ergebnisse sind nur statistische Schätzungen, keine offiziellen Ratings.
 
 **Nicht kopiert:** `theophile-wallez/chesscom-pack` wird ohne separate eindeutige Asset-Lizenz nicht übernommen. Bestehende SchachNova-Designs, Figuren und Daten werden nicht gelöscht oder ersetzt.
+
+## Neo-Illustrationen für Menüs und Coach (MIT, SchachNova 1.0.7)
+- Quelle: https://github.com/theophile-wallez/LichessNeo
+- Dateien: `public/img/sidebar/openings.webp`, `puzzles.webp`, `analysis-board.webp`, `practice.webp` und `public/img/coaches/robot-bust-1.webp`.
+- Unverändert übernommen als `app/src/main/assets/neo-assets/illustrations/*.webp`.
+- Copyright (c) 2026 Théophile Wallez, MIT-Lizenz wie oben vollständig aufgeführt.

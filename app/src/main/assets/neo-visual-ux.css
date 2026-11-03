@@ -1,0 +1,134 @@
+/* SchachNova 1.0.7 — Lichess Neo-inspired visual layer, preserving the silver-blue design. */
+#homeScreen:not(.nova-submenu) .nova-hero{
+ position:relative;isolation:isolate;overflow:hidden;text-align:left!important;
+ margin:5px 0 13px!important;padding:18px 16px 16px!important;
+ border:1px solid #537da8!important;border-radius:18px!important;
+ background:linear-gradient(115deg,#143b65 0%,#0c2447 57%,#081628 100%)!important;
+ box-shadow:0 12px 32px #0006,inset 0 1px 0 #ccecff20!important;
+}
+#homeScreen:not(.nova-submenu) .nova-hero:before{display:none!important}
+#homeScreen:not(.nova-submenu) .nova-hero:after{
+ content:"";position:absolute;right:-18px;top:0;width:46%;height:100%;
+ background:url("neo-assets/illustrations/openings.webp") center/contain no-repeat;
+ opacity:.18;pointer-events:none;z-index:0;
+}
+#homeScreen:not(.nova-submenu) .nova-hero>*{position:relative;z-index:1}
+#homeScreen:not(.nova-submenu) .nova-hero h2{
+ font-family:system-ui,-apple-system,Roboto,sans-serif!important;
+ font-weight:800!important;font-size:clamp(22px,5.7vw,32px)!important;
+ letter-spacing:-.65px!important;line-height:1.15!important;max-width:440px;
+ margin:2px 0 7px!important;filter:none!important;
+ background:none!important;color:#f6fbff!important;-webkit-text-fill-color:#f6fbff!important;
+}
+#homeScreen:not(.nova-submenu) .nova-hero h2:after{display:none!important}
+#homeScreen:not(.nova-submenu) .nova-hero p{
+ font-size:13px!important;line-height:1.5!important;color:#c6d8ea!important;
+ max-width:340px;margin:0 0 12px!important;
+}
+#homeScreen .nova-hero-actions{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:8px;margin:4px 0 10px}
+#homeScreen .nova-hero-actions>button{
+ display:block!important;min-height:46px!important;padding:10px 9px!important;
+ border-radius:11px!important;font-size:13px!important;font-weight:800!important;
+ border:1px solid #9acbfc!important;box-shadow:inset 0 1px 0 #ffffff32,0 3px 10px #0003!important;
+ background:linear-gradient(160deg,#3f91d7,#1d578e)!important;color:#fff!important;
+}
+#homeScreen .nova-hero-actions>button:last-child{background:linear-gradient(150deg,#203e65,#14294a)!important;border-color:#658db6!important}
+#homeScreen .nova-hero-status{display:flex;gap:9px;align-items:center;flex-wrap:wrap;min-height:25px;color:#b8d8f2;font-size:11px}
+#homeScreen .nova-hero-status button{background:transparent!important;border:0!important;box-shadow:none!important;padding:3px 0!important;text-decoration:underline;text-underline-offset:3px;color:#c5e9ff!important;font-size:11px!important}
+#homeScreen .nova-hero-status button[hidden]{display:none!important}
+#homeScreen .nova-premium-menu{gap:9px!important;margin:9px 0 14px!important}
+#homeScreen .nova-premium-menu>button{
+ display:grid!important;grid-template-columns:54px minmax(0,1fr) 16px!important;
+ gap:10px!important;min-height:68px!important;padding:7px 11px 7px 7px!important;
+ background:linear-gradient(150deg,#1a3c60,#10253e)!important;
+ border:1px solid #406588!important;border-radius:14px!important;
+ box-shadow:inset 0 1px 0 #ffffff1a,0 5px 13px #0003!important;
+}
+#homeScreen .nova-premium-menu>button .nova-menu-icon{
+ position:relative;overflow:hidden;width:52px!important;height:52px!important;
+ display:grid;place-items:center;border-radius:11px!important;
+ background:radial-gradient(circle at 30% 20%,#3b79aa,#112e53)!important;
+ border:1px solid #629bc4!important;box-shadow:inset 0 1px 0 #d5f3ff34!important;
+}
+#homeScreen .nova-premium-menu>button .nova-menu-icon img{
+ display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;
+ filter:drop-shadow(0 2px 3px #0006);
+}
+#homeScreen .nova-premium-menu strong{font-size:15px!important;letter-spacing:-.2px}
+#homeScreen .nova-premium-menu small{font-size:11px!important;line-height:1.35}
+#homeScreen .nova-premium-menu>button i{font-size:24px}
+#homeScreen .nova-more-modes{
+ border:1px solid #375d7f;border-radius:13px;overflow:hidden;
+ background:linear-gradient(165deg,#112b49,#0a1a2f);margin-top:1px;
+}
+#homeScreen .nova-more-modes>summary{
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ min-height:48px;padding:11px 14px;cursor:pointer;list-style:none;
+ color:#d6e9fa;font-weight:730;font-size:13px;
+}
+#homeScreen .nova-more-modes>summary::-webkit-details-marker{display:none}
+#homeScreen .nova-more-modes>summary span{font-size:23px;line-height:1;transition:transform .18s ease}
+#homeScreen .nova-more-modes[open]>summary span{transform:rotate(180deg)}
+#homeScreen .nova-more-grid{display:grid;gap:7px;padding:0 8px 8px}
+#homeScreen .nova-more-grid>button{
+ width:100%;display:grid!important;grid-template-columns:40px minmax(0,1fr) 16px!important;
+ align-items:center;gap:10px;min-height:57px;padding:7px 10px!important;
+ text-align:left!important;border:1px solid #3e658a!important;border-radius:10px!important;
+ background:#133052!important;color:#eff7ff!important;
+}
+#homeScreen .nova-more-grid .nova-menu-icon{
+ display:grid;place-items:center;width:38px!important;height:38px!important;
+ font-size:22px!important;border-radius:9px!important;
+ background:#1b4877!important;color:#ddecff!important;
+}
+#homeScreen .nova-more-grid strong{font-size:14px!important}
+#homeScreen .nova-more-grid small{font-size:11px!important}
+#homeScreen .nova-more-grid i{font-size:20px!important}
+#homeScreen .nova-premium-menu button:active,#homeScreen .nova-more-grid button:active{transform:scale(.985)}
+#homeScreen .nova-more-modes>summary:focus-visible{outline:3px solid #a9deff;outline-offset:-3px}
+#trainingSearchWrap[hidden],#trainingSearchEmpty[hidden],#trainingList>[hidden],#practiceRecommendation[hidden]{display:none!important}
+#trainingSearchWrap{padding:7px 0 11px;display:grid;gap:7px;max-width:740px}
+#trainingSearchWrap label{font-size:12px;font-weight:750;color:#d7ebff}
+#trainingSearch{
+ display:block;width:100%;min-height:46px;border:1px solid #5b8fbe!important;
+ border-radius:11px;padding:10px 13px;background:#102b49!important;
+ color:#fff!important;font-size:16px;
+}
+#trainingSearch::placeholder{color:#adc3d9}
+#trainingSearchEmpty{color:#c7d8eb;font-size:13px;line-height:1.4;padding:6px 10px}
+#trainingScreen .practice-dashboard{border-radius:15px!important;box-shadow:0 8px 25px #0003}
+#trainingScreen #practiceRecommendation{
+ width:100%;text-align:left;min-height:46px!important;font-size:13px!important;
+ border:1px solid #7bbcff!important;margin-top:9px;
+ background:linear-gradient(110deg,#1c5a98,#10385e)!important;
+}
+#trainingScreen .training-line-row>.training-card{display:flex;align-items:center;gap:10px}
+#trainingScreen .training-thumb{flex:0 0 34px;min-width:34px}
+#trainingScreen .training-card-copy{flex:1;min-width:0}
+#trainingScreen .training-card-copy small{line-height:1.4}
+#gameScreen .coach-avatar,#reviewPanel .review-coach-icon,#overviewPanel .review-coach-icon{
+ display:grid;place-items:center;overflow:hidden;flex-shrink:0;
+ width:48px;height:48px;background:linear-gradient(150deg,#27567d,#122944);
+ border-radius:13px;border:1px solid #6398be;
+}
+#gameScreen .coach-avatar img,#reviewPanel .review-coach-icon img,#overviewPanel .review-coach-icon img{
+ display:block;width:100%;height:100%;object-fit:contain;
+ filter:drop-shadow(0 2px 3px #0006);
+}
+#archivePanel .archive-entry{min-height:52px;line-height:1.4;text-align:left}
+#archivePanel #archiveList>div{min-width:0}
+#archivePanel #archiveList>div>button:not(.archive-entry){flex:0 0 auto;min-width:43px}
+#progressDashboard svg{border:1px solid #466788;background:#122642!important;border-radius:11px}
+@media(min-width:680px){
+ #homeScreen .nova-premium-menu{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #homeScreen .nova-more-modes{grid-column:1/-1}
+ #homeScreen .nova-more-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #homeScreen:not(.nova-submenu) .nova-hero{padding:24px!important}
+}
+@media(max-width:380px){
+ #homeScreen .nova-hero-actions{grid-template-columns:1fr 1fr}
+ #homeScreen .nova-hero-actions>button{font-size:12px!important;padding:9px 4px!important}
+ #homeScreen .nova-premium-menu>button{grid-template-columns:48px minmax(0,1fr) 14px!important}
+ #homeScreen .nova-premium-menu>button .nova-menu-icon{width:46px!important;height:46px!important}
+}
+@media(prefers-reduced-motion:reduce){#homeScreen .nova-more-modes>summary span{transition:none!important}}
