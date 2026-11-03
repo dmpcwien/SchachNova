@@ -19,15 +19,15 @@
   return cache[id]='data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
  }
  function refresh(){
-  const chrome=document.body.dataset.pieceSkin==="silverblue";
-  document.querySelectorAll('img.piece-img, img.rect-piece-svg, img.rect-compound-svg-icon').forEach(img=>{
+  const skin=document.body.dataset.pieceSkin;
+  document.querySelectorAll('img.piece-img, img.rect-piece-svg, img.rect-compound-svg-icon, img.review-piece, img.simultan-piece').forEach(img=>{
    const original=img.dataset.novaOriginal||img.getAttribute('src');
    if(!img.dataset.novaOriginal&&/^pieces\/[wb][KQRBNP]\.svg$/.test(original))img.dataset.novaOriginal=original;
    const path=img.dataset.novaOriginal;
    if(!path)return;
    const match=/^pieces\/([wb])([KQRBNP])\.svg$/.exec(path);
    if(!match)return;
-   const wanted=chrome?sculpted(match[1],match[2]):path;
+   const wanted=skin==="silverblue"?sculpted(match[1],match[2]):skin==="warmwood"?`neo-assets/warmwood/pieces/${match[1]}${match[2]}.svg`:skin==="mochi"||skin==="mellow"?`neo-assets/${skin}/pieces/${match[1]}${match[2]}.webp`:path;
    if(img.getAttribute('src')!==wanted)img.setAttribute('src',wanted);
   });
  }
