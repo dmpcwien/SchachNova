@@ -941,3 +941,18 @@ button:focus-visible,select:focus-visible,input:focus-visible,[role="button"]:fo
 #gameScreen .headline{flex-wrap:wrap;align-items:stretch;gap:8px}
 #gameScreen .headline .turnpanel{flex:1 1 100%;min-width:0;height:auto}
 #gameScreen .headline>button{flex:1 1 0;min-width:88px;min-height:44px;height:auto}
+
+
+/* Optional Lichess Neo board artwork. The original SchachNova styles remain unchanged. */
+body[data-board-skin="warmwood"] :is(#board,#trainingBoard,#reviewBoard,.simultan-board){background-image:url("neo-assets/warmwood/board.svg")!important;background-position:center!important;background-repeat:no-repeat!important;background-size:100% 100%!important;background-color:#30445d!important}
+body[data-board-skin="neo-slate"] :is(#board,#trainingBoard,#reviewBoard,.simultan-board){background-image:url("neo-assets/boards/slate.webp")!important;background-position:center!important;background-repeat:no-repeat!important;background-size:100% 100%!important;background-color:#30445d!important}
+body[data-board-skin="neo-brushed"] :is(#board,#trainingBoard,#reviewBoard,.simultan-board){background-image:url("neo-assets/boards/brushed.webp")!important;background-position:center!important;background-repeat:no-repeat!important;background-size:100% 100%!important;background-color:#30445d!important}
+body[data-board-skin="warmwood"] :is(#board,#trainingBoard,#reviewBoard,.simultan-board)>:is(.sq,.review-square,.simultan-square):not(.lastmove):not(.last-move):not(.review-highlight):not(.hint-origin):not(.hint-destination):not(.king-in-check):not(.in-check){background:transparent!important}
+body[data-board-skin="neo-slate"] :is(#board,#trainingBoard,#reviewBoard,.simultan-board)>:is(.sq,.review-square,.simultan-square):not(.lastmove):not(.last-move):not(.review-highlight):not(.hint-origin):not(.hint-destination):not(.king-in-check):not(.in-check){background:transparent!important}
+body[data-board-skin="neo-brushed"] :is(#board,#trainingBoard,#reviewBoard,.simultan-board)>:is(.sq,.review-square,.simultan-square):not(.lastmove):not(.last-move):not(.review-highlight):not(.hint-origin):not(.hint-destination):not(.king-in-check):not(.in-check){background:transparent!important}
+body[data-board-skin="warmwood"] #board>.sq.lastmove,
+body[data-board-skin="warmwood"] #trainingBoard>.sq.lastmove{background:rgba(255,209,72,.49)!important}
+/* Source artwork already contains its intended colors: do not apply chrome filters. */
+body[data-piece-skin="warmwood"] :is(.piece-img,.review-piece,.simultan-piece),
+body[data-piece-skin="mochi"] :is(.piece-img,.review-piece,.simultan-piece),
+body[data-piece-skin="mellow"] :is(.piece-img,.review-piece,.simultan-piece){filter:drop-shadow(0 2px 2px #0006)!important}
