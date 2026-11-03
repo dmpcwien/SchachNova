@@ -74,6 +74,20 @@
    }
    return list.sort((a,b)=>a.oldest-b.oldest||b.count-a.count);
   }
+  function recommendation(lines){
+   const due=dueLines(lines);
+   if(due.length)return {line:due[0].line,reason:due[0].count+" Zug"+(due[0].count===1?"":"e")+" jetzt wiederholen"};
+   const practiced=lines.map(line=>({line,metrics:lineMetrics(line)})).filter(x=>x.metrics.practiced>0);
+   if(practiced.length){
+    practiced.sort((a,b)=>{
+     const priority=m=>(m.missed/Math.max(1,m.seen))*.7+(1-m.progress)*.3;
+     return priority(b.metrics)-priority(a.metrics)||a.line.title.localeCompare(b.line.title,"de");
+    });
+    return {line:practiced[0].line,reason:"Diese Eröffnung weiter festigen"};
+   }
+   const line=lines.find(isFavorite)||lines[0];
+   return line?{line,reason:"Mit deinem Repertoire starten"}:null;
+  }
   function isFavorite(line){return read().favorites.includes(nameOf(line));}
   function toggleFavorite(line){
    const d=read(),name=nameOf(line),has=d.favorites.includes(name);
@@ -89,7 +103,7 @@
   function goal(){return read().goal;}
   function setGoal(value){const d=read();d.goal=Math.max(5,Math.min(50,Math.round(Number(value)||GOAL)));save(d);return d.goal;}
   function summary(lines){const due=dueLines(lines);return {dueLines:due.length,duePositions:due.reduce((n,x)=>n+x.count,0),today:dayCount(),goal:goal(),streak:dayStreak(),favorites:lines.filter(isFavorite).length,practiced:lines.filter(l=>lineMetrics(l).practiced>0).length};}
-  return {keyOf,noteMiss,noteMove,lineMetrics,dueLines,isFavorite,toggleFavorite,dayCount,dayStreak,goal,setGoal,summary,exportData:()=>read()};
+  return {keyOf,noteMiss,noteMove,lineMetrics,dueLines,recommendation,isFavorite,toggleFavorite,dayCount,dayStreak,goal,setGoal,summary,exportData:()=>read()};
  }
  return {createPractice,localDay,previousDay,ownIndices,keyOf};
 });

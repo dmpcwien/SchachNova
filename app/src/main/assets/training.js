@@ -70,6 +70,14 @@ function updatePracticeDashboard(){
  $("practiceMastered").textContent=d.practiced+" / "+opening.length+" Eröffnungen begonnen";
  $("practiceDailyBar").value=Math.min(100,Math.round(d.today/d.goal*100));
  $("practiceGoalSelect").value=String(d.goal);
+ const suggestion=practice.recommendation?.(opening),button=$("practiceRecommendation");
+ if(button){
+  button.hidden=!suggestion||!$("trainingBoardArea").hidden;
+  if(suggestion){
+   button.textContent="💡 Heute empfohlen: "+suggestion.line.title+" · "+suggestion.reason+" ›";
+   button.onclick=()=>start(suggestion.line,true,"home");
+  }
+ }
 }
 $("practiceGoalSelect")?.addEventListener("change",e=>{practice?.setGoal(Number(e.target.value));updatePracticeDashboard();});
 function exit(){trainingFinished=false;stopWorker();$("trainingScreen").hidden=true;$("homeScreen").hidden=false;active=null;if(previousVariantMode!==null){variantMode=previousVariantMode;previousVariantMode=null;}}
@@ -173,7 +181,7 @@ function requestEndgameHint(){
 }
 function start(data,isOpening,sourceGroup){
  stopWorker();if(previousVariantMode===null)previousVariantMode=variantMode;variantMode="standard";active={data,opening:isOpening,sourceGroup:sourceGroup||(isOpening?data.group:"endgames")};trainingFinished=false;ply=0;errors=0;selected=-1;troubleSteps=new Set();hintedSteps=new Set();resetHint();state=isOpening?initial():fenState(data.fen);
- $("trainingTitle").textContent=data.title;$("trainingList").hidden=true;$("trainingBoardArea").hidden=false;
+ $("trainingTitle").textContent=data.title;$("trainingList").hidden=true;$("trainingBoardArea").hidden=false;if($("practiceRecommendation"))$("practiceRecommendation").hidden=true;
  $("trainingBack").onclick=()=>showMenu(active?.sourceGroup||"home");
  $("trainingReset").onclick=()=>start(data,isOpening,sourceGroup);
  $("trainingHint").onclick=()=>{if(!active)return;let moveText=null;if(isOpening){moveText=data.moves[ply];}else{requestEndgameHint();return;}if(!moveText){label("Keine weiteren Züge verfügbar.");return;}hintedSteps.add(ply);const square=v=>(8-Number(v[1]))*16+"abcdefgh".indexOf(v[0]);hintStep=Math.min(2,hintStep+1);hintFrom=square(moveText.slice(0,2));hintTo=hintStep===2?square(moveText.slice(2,4)):-1;label(hintStep===1?"Hinweis 1/2: Die richtige Figur ist markiert.":"Hinweis 2/2: Das Zielfeld ist zusätzlich markiert.");renderTraining();animateHint();};

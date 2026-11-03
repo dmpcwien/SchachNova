@@ -236,7 +236,13 @@ timer=setInterval(tick,250);render();
 // Lokale automatische Sicherung; keine Server-Wertung wird vorgetäuscht.
 function saveGame(){try{localStorage.setItem("schachnova-game-v2",JSON.stringify({history,movesPlayed,clockHistory,clock,viewIndex,flipped,ended,variantMode,blindLevel,checksGiven,time:Date.now()}));}catch(_){}}
 function restoreGame(){try{const raw=localStorage.getItem("schachnova-game-v2");if(!raw)return;const d=JSON.parse(raw);if(!Array.isArray(d.history)||!d.history.length||!d.history.every(x=>Array.isArray(x.b)&&x.b.length===128))return;history=d.history;movesPlayed=Array.isArray(d.movesPlayed)?d.movesPlayed:[];clockHistory=Array.isArray(d.clockHistory)?d.clockHistory:[[600,600]];clock=Array.isArray(d.clock)?d.clock:[600,600];viewIndex=Math.min(history.length-1,Math.max(0,d.viewIndex||0));flipped=!!d.flipped;ended=d.ended||"";variantMode=["standard","hill","threecheck","fivecheck","hoppelpoppel","torpedo","berolina","nocastling","antichess","atomic"].includes(d.variantMode)?d.variantMode:"standard";blindLevel=Math.max(0,Math.min(5,Number(d.blindLevel)||0));checksGiven=[0,0];if(variantMode==="threecheck"||variantMode==="fivecheck"){for(let j=1;j<history.length;j++)if(checked(history[j]))checksGiven[history[j-1].t===1?0:1]++;const target=variantMode==="fivecheck"?5:3,name=variantMode==="fivecheck"?"Fünf-Schach":"Drei-Schach";if(checksGiven[0]>=target||checksGiven[1]>=target)ended=name+" – "+(checksGiven[0]>=target?"Weiß":"Schwarz")+" gewinnt";}if(variantMode==="antichess"){const outcome=status();if(outcome.startsWith("Räuberschach – ")&&outcome.endsWith(" gewinnt"))ended=outcome;}if(variantMode==="atomic"){const outcome=status();if(outcome.startsWith("Atomschach – "))ended=outcome;}running=false;render();}catch(_){}}
-function exportPgn(){const lines=['[Event "SchachNova Offline"]','[Site "Android"]','[Result "*"]','','{ Zugfolge als Koordinaten, nicht SAN }',movesPlayed.map((m,j)=>(j%2===0?Math.floor(j/2)+1+'. ':'')+"abcdefgh"[m[0]&7]+(8-(m[0]>>4))+"abcdefgh"[m[1]&7]+(8-(m[1]>>4))+(m[2]||"")).join(' ')+' *'];const blob=new Blob([lines.join("\n")],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='SchachNova-Partie.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function exportPgn(){
+ try{
+  const game={variant:variantMode,moves:movesPlayed,positions:history,timestamp:Date.now(),message:ended||""};
+  const file=window.SchachNovaNotation.generate(game,{legal,checked});
+  window.SchachNovaNotation.download(file);
+ }catch(e){alert("Partie konnte nicht exportiert werden: "+e.message);}
+}
 restoreGame();
 
 let dragGhost=null;
