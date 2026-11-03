@@ -21,6 +21,7 @@
  function refresh(){
   const skin=document.body.dataset.pieceSkin;
   document.querySelectorAll('img.piece-img, img.rect-piece-svg, img.rect-compound-svg-icon, img.review-piece, img.simultan-piece').forEach(img=>{
+   if(img.closest(".nova-motion-sprite"))return;
    const original=img.dataset.novaOriginal||img.getAttribute('src');
    if(!img.dataset.novaOriginal&&/^pieces\/[wb][KQRBNP]\.svg$/.test(original))img.dataset.novaOriginal=original;
    const path=img.dataset.novaOriginal;

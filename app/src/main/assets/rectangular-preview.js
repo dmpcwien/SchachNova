@@ -49,42 +49,19 @@
   board.replaceChildren(fragment);
   document.getElementById("rectPreviewUndo").disabled=history.length===0;
  }
- function clearMotion(){
-  if(!motion)return;
-  const old=motion;motion=null;
-  old.animation?.cancel();old.sprite.remove();
-  const board=document.getElementById("rectPreviewBoard");
-  if(board&&position){const shape=geo.geometry(position.variant);const idx=flipped?shape.squares-1-old.to:old.to;board.children[idx]?.classList.remove("rect-preview-motion-target");}
- }
- function animateMove(from,to){
-  clearMotion();
-  const board=document.getElementById("rectPreviewBoard");
-  if(!board||window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)return;
+ /* One animation renderer for 10x8 compound and standard figures, same as 8x8. */
+ function clearMotion(){window.SchachNovaMoveAnimator?.cancel(document.getElementById("rectPreviewBoard"));}
+ function captureMove(move){
+  const board=document.getElementById("rectPreviewBoard"),api=window.SchachNovaMoveAnimator;
+  if(!board||!position||!api)return null;
   const shape=geo.geometry(position.variant);
-  const cellIndex=n=>flipped?shape.squares-1-n:n;
-  const origin=board.children[cellIndex(from)],destination=board.children[cellIndex(to)];
-  if(!origin||!destination||!origin.animate)return;
-  if([...origin.querySelectorAll("img")].some(img=>!img.complete))return;
-  const a=origin.getBoundingClientRect(),b=destination.getBoundingClientRect();
-  const moving=document.createElement("div");
-  moving.className="rect-preview-piece-motion";
-  moving.setAttribute("aria-hidden","true");
-  const pieceNode=origin.querySelector(".rect-piece-svg, .rect-compound-svg");
-  if(!pieceNode)return;
-  moving.append(pieceNode.cloneNode(true));
-  moving.style.cssText="position:fixed;left:"+a.left+"px;top:"+a.top+"px;width:"+a.width+"px;height:"+a.height+"px;z-index:9999;pointer-events:none;margin:0;border:0;";
-  document.body.append(moving);
-  const duration=Math.min(410,Math.max(190,180+Math.hypot(b.left-a.left,b.top-a.top)/2.8));
-  motion={to,sprite:moving,animation:null};
-  const animation=moving.animate([
-   {transform:"translate3d(0,0,0) scale(1)",filter:"brightness(1)"},
-   {transform:"translate3d("+(b.left-a.left)*.55+"px,"+(b.top-a.top)*.55+"px,0) scale(1.025)",filter:"brightness(1.035)",offset:.58},
-   {transform:"translate3d("+(b.left-a.left)+"px,"+(b.top-a.top)+"px,0) scale(1)",filter:"brightness(1)"}
-  ],{duration,easing:"cubic-bezier(.25,.72,.22,1)"});
-  motion.animation=animation;
-  animation.onfinish=()=>{if(motion?.sprite===moving)clearMotion();else moving.remove();};
-  animation.oncancel=()=>moving.remove();
-  setTimeout(()=>{if(motion?.sprite===moving)clearMotion();else moving.remove();},duration+150);
+  const cell=i=>board.children[flipped?shape.squares-1-i:i]||null;
+  const primary={from:move.from,to:move.to};
+  if(move.enPassant)primary.captureAt=move.to+(position.turn==="w"?shape.width:-shape.width);
+  else if(position.board[move.to]!==".")primary.captureAt=move.to;
+  const steps=[primary];
+  if(move.castle)steps.push({from:move.rookFrom,to:move.rookTo});
+  return api.capture(board,steps,cell);
  }
  function tap(index){
   if(ended||!position)return;
@@ -96,13 +73,14 @@
     if(answer===null)return;
     move=moves.find(m=>m.promotion===answer.trim().toLowerCase())||moves[0];
    }
-   animateMove(move.from,move.to);
+   const animated=captureMove(move);
    lastMove={from:move.from,to:move.to};
    history.push({position,move:lastMove});
    position=rules.apply(position,move);
    selected=null;legal=[];
    ended=rules.status(position).ended;
    render();
+   window.SchachNovaMoveAnimator?.play(animated);
    return;
   }
   const piece=position.board[index],own=position.turn==="w"?piece===piece.toUpperCase():piece===piece.toLowerCase();

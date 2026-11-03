@@ -78,9 +78,17 @@ function describe(i,loss,bestMove){
  if(loss<320)return (tactical?tactical+" ":"")+"Hier verliert deine Stellung deutlich an Wert. Suche zuerst nach gegnerischen taktischen Möglichkeiten und prüfe Kandidatenzüge."+(better?" Die Engine bevorzugt "+better+".":"");
  return (tactical?tactical+" ":"")+"Dieser Zug führt zu einem großen Bewertungsverlust. Überprüfe, ob eine Figur hängt, ein Mattangriff entsteht oder eine taktische Kombination möglich ist."+(better?" Stärker war "+better+".":"");
 }
-function drawReviewBoard(previous=-1){
+function drawReviewBoard(previous=-1,explicitMove=null){
  const board=$("reviewBoard");if(!board||!positions.length)return;
  const state=previewState||positions[reviewAt];if(!state)return;
+ const api=window.SchachNovaMoveAnimator,cell=i=>board.children[(i>>4)*8+(i&7)]||null;
+ let spec=null;
+ if(explicitMove)spec=api?.standardMoves(explicitMove,null);
+ else if(previous>=0&&reviewAt===previous+1)spec=api?.standardMoves(movesPlayed[previous],positions[previous]);
+ else if(previous>=0&&reviewAt===previous-1){
+  const m=movesPlayed[reviewAt];if(m)spec=[{from:m[1],to:m[0]}];
+ }
+ const motion=spec?.length?api?.capture(board,spec,cell):null;
  board.replaceChildren();
  const move=previewMove||(reviewAt>0?movesPlayed[reviewAt-1]:null);
  for(let j=0;j<64;j++){
@@ -90,12 +98,6 @@ function drawReviewBoard(previous=-1){
   if(p!=="."){const img=document.createElement("img");img.src="pieces/"+(p===p.toUpperCase()?"w":"b")+p.toUpperCase()+".svg";img.alt="";img.className="review-piece";cell.append(img);}
   if(training&&training.square===i){cell.style.outline="3px solid #ffda65";cell.style.outlineOffset="-3px";}
   cell.onclick=()=>trainingClick(i);board.append(cell);
- }
- if(previous>=0&&reviewAt===previous+1&&move){
-  const from=(move[0]>>4)*8+(move[0]&7),to=(move[1]>>4)*8+(move[1]&7);
-  const img=board.children[to]?.querySelector("img");
-  if(img){const dx=((from%8)-(to%8))*100,dy=(Math.floor(from/8)-Math.floor(to/8))*100;
-   img.animate([{transform:"translate("+dx+"%, "+dy+"%)"},{transform:"translate(0,0)"}],{duration:360,easing:"cubic-bezier(.2,.75,.25,1)"});}
  }
  // Chess-review overlay: move arrow and category badge, without adding a grid cell.
  const oldOverlay=board.querySelector(".review-arrow-overlay");if(oldOverlay)oldOverlay.remove();
@@ -133,6 +135,7 @@ function drawReviewBoard(previous=-1){
  $("reviewCoachText").textContent=message;
  $("reviewPrevious").disabled=reviewAt===0;
  $("reviewNext").disabled=reviewAt>=movesPlayed.length;
+ api?.play(motion);
 }
 function selectReview(n){stopLine();const previous=reviewAt;reviewAt=Math.max(0,Math.min(movesPlayed.length,n));previewState=null;previewMove=null;training=null;drawReviewBoard(previous);}
 function uciLegal(s,u){if(!/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(u))return null;return legal(s).find(m=>notation(m)===u)||null;}
@@ -155,14 +158,13 @@ function playBestLine(){
  stopReplay();stopLine();const i=reviewAt-1;
  if(i<0||!results[i]?.best||results[i].best==="(none)"){$("reviewExerciseStatus").textContent="Für diesen Zug liegt keine Engine-Empfehlung vor.";return;}
  const sequence=results[i].pv?.length?results[i].pv:[results[i].best];
- let state=positions[i],step=0;training=null;
+ let state=positions[i],step=0;training=null;previewState=state;previewMove=null;drawReviewBoard();
  function advance(){
   if(step>=sequence.length){lineTimer=null;$("reviewExerciseStatus").textContent="Stockfish-Variante beendet ("+step+" Halbzüge).";return;}
   const u=sequence[step],m=uciLegal(state,u);
   if(!m){lineTimer=null;$("reviewExerciseStatus").textContent="Variante nach "+step+" Zügen beendet: nicht legaler Engine-Zug.";return;}
-  state=apply(state,m);previewState=state;previewMove=m;drawReviewBoard();
-  const from=(m[0]>>4)*8+(m[0]&7),to=(m[1]>>4)*8+(m[1]&7),img=$("reviewBoard").children[to]?.querySelector("img");
-  if(img?.animate){const width=$("reviewBoard").children[to].getBoundingClientRect().width;img.animate([{transform:"translate("+((from%8)-(to%8))*width+"px,"+(Math.floor(from/8)-Math.floor(to/8))*width+"px)"},{transform:"translate(0,0)"}],{duration:330,easing:"ease-out"});}
+  state=apply(state,m);previewState=state;previewMove=m;drawReviewBoard(-1,m);
+  // Shared motion already moved the visible sprite before the new image appeared.
   step++;$("reviewExerciseStatus").textContent="Stockfish-Variante: "+step+" / "+sequence.length+" · "+u;
   lineTimer=setTimeout(advance,Math.max(450,Number($("reviewSpeed")?.value||900)));
  }

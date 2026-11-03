@@ -100,75 +100,24 @@ let clockAlertSecond=[null,null];
 function clockWarning(index,second){if(clockAlertSecond[index]===second)return;clockAlertSecond[index]=second;if(second===10)window.SchachNovaSounds?.play("tenseconds");try{const C=window.AudioContext||window.webkitAudioContext;if(C){const ctx=new C(),osc=ctx.createOscillator(),gain=ctx.createGain();osc.type="sine";osc.frequency.value=second===1?1150:second<=3?1000:780;gain.gain.setValueAtTime(.055,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.14);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+.15);osc.onended=()=>ctx.close();}}catch(_){}vibrate([second<=3?95:40]);}
 function tick(){const now=performance.now(),dt=(now-last)/1000;last=now;if(running&&!ended&&viewIndex===history.length-1){const i=current().t===1?0:1;const before=Math.ceil(clock[i]);clock[i]=Math.max(0,clock[i]-dt);const after=Math.ceil(clock[i]);for(let threshold=10;threshold>=1;threshold--){if(before>threshold&&after<=threshold&&clock[i]>0)clockWarning(i,threshold);}if(clock[i]<=0){clock[i]=0;ended="Zeit abgelaufen – "+(i===0?"Schwarz":"Weiß")+" gewinnt";running=false;}}renderClocks();}
 function renderClocks(){document.getElementById("whiteClock").textContent=format(Math.ceil(clock[0]));document.getElementById("blackClock").textContent=format(Math.ceil(clock[1]));document.getElementById("status").textContent=ended||status();if(ended&&ended!==lastEndShown){lastEndShown=ended;showGameResult(ended);}document.getElementById("whiteClock").classList.toggle("active-clock",running&&current().t===1);document.getElementById("blackClock").classList.toggle("active-clock",running&&current().t===-1);const claim=document.getElementById("claimDraw");if(claim){const reason=drawClaimReason();claim.disabled=!!ended||!reason;claim.textContent=reason?"½ Remis beanspruchen ("+reason+")":"½ Remis beanspruchen";}}
-function move(m){if(ended)return;const permitted=legal(current()).find(x=>Array.isArray(m)&&x[0]===m[0]&&x[1]===m[1]&&x[2]===m[2]&&x[3]===m[3]);if(!permitted)return;tick();if(ended)return;m=permitted;const old=current(),capture=old.b[m[1]]!=="."||m[3]==="ep"||m[3]==="berolinaEp";history.push(apply(old,m));movesPlayed.push(m);if((variantMode==="threecheck"||variantMode==="fivecheck")&&checked(current()))checksGiven[old.t===1?0:1]++;if(movesPlayed.length===2&&!running){running=true;last=performance.now();}if(window.schachNovaIncrement){clock[old.t===1?0:1]+=window.schachNovaIncrement;}clockHistory.push(clock.slice());viewIndex=history.length-1;selected=-1;warnedClock=false;clockAlertSecond[old.t===1?0:1]=null;const normalKingRules=variantMode!=="antichess"&&variantMode!=="atomic";const isMate=normalKingRules&&!legal(current()).length&&checked(current());const isCheck=normalKingRules&&checked(current());vibrate(isMate?[65,85,65]:isCheck?[160,65,80]:capture?[110]:[35]);const stateText=status();ended=stateText.startsWith("Weiß am Zug")||stateText.startsWith("Schwarz am Zug")?"":stateText;if(ended){running=false;premove=null;premoveQueue=[];}last=performance.now();render();animateMovedPiece(m);window.SchachNovaSounds?.playMove({capture,check:isCheck,mate:isMate,castle:m[3]==="castle",promote:!!m[2]});saveGame();
+function move(m){if(ended)return;const permitted=legal(current()).find(x=>Array.isArray(m)&&x[0]===m[0]&&x[1]===m[1]&&x[2]===m[2]&&x[3]===m[3]);if(!permitted)return;tick();if(ended)return;m=permitted;const old=current(),motion=captureMovedPiece(m,old),capture=old.b[m[1]]!=="."||m[3]==="ep"||m[3]==="berolinaEp";history.push(apply(old,m));movesPlayed.push(m);if((variantMode==="threecheck"||variantMode==="fivecheck")&&checked(current()))checksGiven[old.t===1?0:1]++;if(movesPlayed.length===2&&!running){running=true;last=performance.now();}if(window.schachNovaIncrement){clock[old.t===1?0:1]+=window.schachNovaIncrement;}clockHistory.push(clock.slice());viewIndex=history.length-1;selected=-1;warnedClock=false;clockAlertSecond[old.t===1?0:1]=null;const normalKingRules=variantMode!=="antichess"&&variantMode!=="atomic";const isMate=normalKingRules&&!legal(current()).length&&checked(current());const isCheck=normalKingRules&&checked(current());vibrate(isMate?[65,85,65]:isCheck?[160,65,80]:capture?[110]:[35]);const stateText=status();ended=stateText.startsWith("Weiß am Zug")||stateText.startsWith("Schwarz am Zug")?"":stateText;if(ended){running=false;premove=null;premoveQueue=[];}last=performance.now();render();animateMovedPiece(m,motion);window.SchachNovaSounds?.playMove({capture,check:isCheck,mate:isMate,castle:m[3]==="castle",promote:!!m[2]});saveGame();
 if(!premove&&premoveQueue.length&&current().t===(window.schachNovaBotColor===1?-1:1)&&!ended&&document.getElementById("botMode").value==="bot"){premove=premoveQueue.shift();}
 if(premove&&current().t===(window.schachNovaBotColor===1?-1:1)&&!ended&&document.getElementById("botMode").value==="bot"){
  const queued=premove;premove=null;premoveFrom=-1;
  setTimeout(()=>{if(ended||current().t!==(window.schachNovaBotColor===1?-1:1))return;const legalPremove=legal(current()).find(x=>x[0]===queued[0]&&x[1]===queued[1]);if(legalPremove)move(legalPremove);else{premoveQueue=[];render();}},120);
 }}
-let activePieceAnimation=null;
-let activePieceCleanup=null;
-function stopPieceAnimation(){
- if(activePieceCleanup)activePieceCleanup();
- if(activePieceAnimation){activePieceAnimation.cancel();activePieceAnimation=null;}
+/* Source-first, style-independent movement for local chess, bots and variants. */
+const animationBoard=()=>document.getElementById("board");
+const animationCell=i=>{
+ const board=animationBoard(),r=i>>4,c=i&7;
+ return board?.children[(flipped?7-r:r)*8+(flipped?7-c:c)]||null;
+};
+function stopPieceAnimation(){window.SchachNovaMoveAnimator?.cancel(animationBoard());}
+function captureMovedPiece(m,before){
+ const api=window.SchachNovaMoveAnimator;
+ return api?.capture(animationBoard(),api.standardMoves(m,before),animationCell)||null;
 }
-function animateMovedPiece(m){
- const board=document.getElementById("board");if(!board)return;
- const fromRow=m[0]>>4,fromCol=m[0]&7,toRow=m[1]>>4,toCol=m[1]&7;
- const fromIndex=(flipped?7-fromRow:fromRow)*8+(flipped?7-fromCol:fromCol);
- const toIndex=(flipped?7-toRow:toRow)*8+(flipped?7-toCol:toCol);
- const fromCell=board.children[fromIndex],toCell=board.children[toIndex];
- const target=toCell?.querySelector(".piece-img, .blind-disk");
- if(!fromCell||!toCell||!target||!target.animate)return;
- stopPieceAnimation();
- const br=board.getBoundingClientRect(),fr=fromCell.getBoundingClientRect(),tr=toCell.getBoundingClientRect();
- // Use a dedicated square-sized overlay. Never append a raw piece image directly
- // to the grid: that creates an extra grid item and can enlarge it dramatically.
- const overlay=document.createElement("div");
- overlay.className="piece-motion-overlay";
- overlay.style.cssText="position:absolute;inset:0;pointer-events:none;z-index:50;overflow:visible;";
- const sprite=document.createElement("div");
- sprite.style.cssText="position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none;will-change:transform;";
- sprite.style.left=(tr.left-br.left)+"px";sprite.style.top=(tr.top-br.top)+"px";
- sprite.style.width=fr.width+"px";sprite.style.height=fr.height+"px";
- const piece=target.cloneNode(true);
- const isBlindDisk=target.classList.contains("blind-disk");
- if(isBlindDisk){
-  // Percent sizing in the grid cell does not survive reliably in an overlay. Freeze the actual disc size.
-  const discRect=target.getBoundingClientRect();
-  piece.style.setProperty("width",discRect.width+"px","important");
-  piece.style.setProperty("height",discRect.height+"px","important");
-  piece.style.setProperty("flex","0 0 auto","important");
-  piece.style.setProperty("transition","none","important");
-  piece.style.setProperty("transform","none","important");
- }else{
-  // The original piece's blue/silver filter depends on its square's CSS class.
-  // Preserve the computed appearance before moving the clone into the overlay.
-  const computed=getComputedStyle(target);
-  piece.style.setProperty("display","block","important");
-  piece.style.setProperty("width",computed.width,"important");
-  piece.style.setProperty("height",computed.height,"important");
-  piece.style.setProperty("max-width","100%","important");
-  piece.style.setProperty("max-height","100%","important");
-  piece.style.setProperty("object-fit","contain","important");
-  piece.style.setProperty("filter",computed.filter,"important");
-  piece.style.setProperty("-webkit-filter",computed.filter,"important");
-  piece.style.setProperty("transition","none","important");
-  piece.style.setProperty("animation","none","important");
- }
- sprite.append(piece);overlay.append(sprite);
- board.style.position="relative";board.append(overlay);target.style.visibility="hidden";
- const dx=tr.left-fr.left,dy=tr.top-fr.top;
- const distance=Math.hypot(toCol-fromCol,toRow-fromRow);
- const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
- const duration=reducedMotion?0:isBlindDisk?Math.min(420,Math.max(200,175+distance*30)):Math.min(410,Math.max(190,175+distance*29));
- if(reducedMotion){overlay.remove();target.style.visibility="";return;}
- let done=false,animation;
- const cleanup=()=>{if(done)return;done=true;overlay.remove();target.style.visibility="";if(activePieceAnimation===animation)activePieceAnimation=null;if(activePieceCleanup===cleanup)activePieceCleanup=null;};
- animation=sprite.animate([{transform:"translate3d("+(-dx)+"px,"+(-dy)+"px,0) scale(1)",offset:0},{transform:"translate3d("+(-dx*.42)+"px,"+(-dy*.42)+"px,0) scale(1.025)",offset:.58},{transform:"translate3d(0,0,0) scale(1)",offset:1}],{duration,easing:"cubic-bezier(.25,.72,.22,1)",fill:"forwards"});
- activePieceAnimation=animation;activePieceCleanup=cleanup;animation.onfinish=cleanup;animation.oncancel=cleanup;
- setTimeout(cleanup,duration+180);
-}
+function animateMovedPiece(m,motion){return window.SchachNovaMoveAnimator?.play(motion)||Promise.resolve();}
 function choose(i){
  if(ended||viewIndex!==history.length-1)return;
  const s=current();
@@ -208,10 +157,14 @@ function choose(i){
  }else{selected=-1;render();}
 }
 function render(){const gameScreen=document.getElementById("gameScreen");const faceToFace=document.getElementById("botMode")?.value==="human"&&document.getElementById("gameScreen")?.hidden===false;if(gameScreen)gameScreen.dataset.localSideToMove=history[viewIndex]?.t===-1?"black":"white";gameScreen?.classList.toggle("local-face-to-face",faceToFace);gameScreen?.classList.toggle("local-black-to-move",faceToFace&&window.SchachNovaLocalPieceRotationEnabled!==false&&history[viewIndex]?.t===-1);const b=document.getElementById("board");const s=history[viewIndex];window.SchachNovaMaterial?.render(b,s,flipped);const checkKing=(variantMode==="atomic"?atomicKingThreat(s,s.t):variantMode==="antichess"?false:checked(s))?s.b.indexOf(s.t===1?"K":"k"):-1,lastMove=movesPlayed[viewIndex-1],targets=viewIndex===history.length-1?legal(s).filter(m=>m[0]===selected).map(m=>m[1]):[];for(let r=0;r<8;r++)for(let c=0;c<8;c++){const i=flipped?(7-r)*16+(7-c):r*16+c,el=b.children[r*8+c]||document.createElement("button");el.style.removeProperty("background-color");el.style.removeProperty("box-shadow");el.className="sq "+((r+c)%2?"dark":"light")+(lastMove&&(lastMove[0]===i||lastMove[1]===i)?" lastmove":"")+(selected===i||premoveFrom===i?" selected":"")+(targets.includes(i)?" target":"")+(((premove&&(premove[0]===i||premove[1]===i))||premoveQueue.some(q=>q[0]===i||q[1]===i))?" premove":"");if(i===checkKing){el.style.setProperty("background-color","#ef3340","important");el.style.setProperty("box-shadow","inset 0 0 0 4px #ffd0d0, inset 0 0 24px #970000","important");}const piece=s.b[i];const hiddenPiece=blindLevel>0&&piece!=="."&&(blindLevel===1?/[nN]/.test(piece):blindLevel===2?/[nNbB]/.test(piece):blindLevel===3?/[rRnNbBqQ]/.test(piece):blindLevel===4?/[rRnNbBqQkK]/.test(piece):true);const disk=hiddenPiece&&blindLevel<5;const nextPieceMarkup=piece==="."?"":disk?`<span class="blind-disk ${side(piece)===1?"blind-white":"blind-black"}" aria-hidden="true"></span>`:hiddenPiece?"":`<img class="piece-img" draggable="false" alt="" src="pieces/${side(piece)===1?"w":"b"}${piece.toUpperCase()}.svg">`;if(el.innerHTML!==nextPieceMarkup)el.innerHTML=nextPieceMarkup;el.classList.add(side(s.b[i])===1?"white-piece":"black-piece");el.setAttribute("aria-label",String.fromCharCode(97+(i&7))+(8-(i>>4)));el.onclick=()=>choose(i);el.draggable=side(s.b[i])!==0;el.ondragstart=e=>{e.dataTransfer.setData("text/plain",String(i));};el.ondragover=e=>e.preventDefault();el.ondrop=e=>{e.preventDefault();const from=Number(e.dataTransfer.getData("text/plain"));if(Number.isInteger(from)&&on(from)){selected=from;choose(i);}};if(!el.parentElement)b.append(el);}const ranks=(flipped?[1,2,3,4,5,6,7,8]:[8,7,6,5,4,3,2,1]).join("");const files=flipped?"hgfedcba":"abcdefgh";const rankEl=document.getElementById("rankLabels"),fileEl=document.getElementById("fileLabels");if(rankEl.dataset.order!==ranks){rankEl.dataset.order=ranks;rankEl.innerHTML=ranks.split("").map(n=>"<span>"+n+"</span>").join("");}if(fileEl.dataset.order!==files){fileEl.dataset.order=files;fileEl.innerHTML=files.split("").map(n=>"<span>"+n+"</span>").join("");}const mh=document.getElementById("moveHistory");if(mh)mh.textContent=movesPlayed.length?movesPlayed.map((m,j)=>`${Math.floor(j/2)+1}${j%2?"...":"."} ${"abcdefgh"[m[0]&7]}${8-(m[0]>>4)}–${"abcdefgh"[m[1]&7]}${8-(m[1]>>4)}`).join("  ·  "):"Noch keine Züge";renderClocks();}
-document.getElementById("newGame").onclick=()=>{if(activePieceAnimation){activePieceAnimation.finish();activePieceAnimation=null;}history=[initial()];movesPlayed=[];viewIndex=0;selected=-1;premove=null;premoveFrom=-1;premoveQueue=[];lastEndShown="";warnedClock=false;clock=[Number(document.getElementById("timeSelect").value),Number(document.getElementById("timeSelect").value)];clockHistory=[clock.slice()];checksGiven=[0,0];running=false;ended="";last=performance.now();render();saveGame();window.SchachNovaSounds?.play("game-start");};
+document.getElementById("newGame").onclick=()=>{stopPieceAnimation();history=[initial()];movesPlayed=[];viewIndex=0;selected=-1;premove=null;premoveFrom=-1;premoveQueue=[];lastEndShown="";warnedClock=false;clock=[Number(document.getElementById("timeSelect").value),Number(document.getElementById("timeSelect").value)];clockHistory=[clock.slice()];checksGiven=[0,0];running=false;ended="";last=performance.now();render();saveGame();window.SchachNovaSounds?.play("game-start");};
 
-document.getElementById("undo").onclick=()=>{if(history.length>1){if(activePieceAnimation){activePieceAnimation.finish();activePieceAnimation=null;}history.pop();movesPlayed.pop();clockHistory.pop();clock=clockHistory[clockHistory.length-1].slice();checksGiven=[0,0];if(variantMode==="threecheck"||variantMode==="fivecheck"){for(let j=1;j<history.length;j++)if(checked(history[j]))checksGiven[history[j-1].t===1?0:1]++;}viewIndex=history.length-1;selected=-1;premove=null;premoveFrom=-1;ended="";running=movesPlayed.length>=2;last=performance.now();render();saveGame();}};
-document.getElementById("forward").onclick=()=>{viewIndex=Math.min(history.length-1,viewIndex+1);selected=-1;render();};
+document.getElementById("undo").onclick=()=>{if(history.length>1){stopPieceAnimation();const undone=movesPlayed[movesPlayed.length-1];const undoneMotion=undone?window.SchachNovaMoveAnimator?.capture(animationBoard(),[{from:undone[1],to:undone[0]}],animationCell):null;history.pop();movesPlayed.pop();clockHistory.pop();clock=clockHistory[clockHistory.length-1].slice();checksGiven=[0,0];if(variantMode==="threecheck"||variantMode==="fivecheck"){for(let j=1;j<history.length;j++)if(checked(history[j]))checksGiven[history[j-1].t===1?0:1]++;}viewIndex=history.length-1;selected=-1;premove=null;premoveFrom=-1;ended="";running=movesPlayed.length>=2;last=performance.now();render();window.SchachNovaMoveAnimator?.play(undoneMotion);saveGame();}};
+document.getElementById("forward").onclick=()=>{
+ if(viewIndex>=history.length-1)return;
+ const m=movesPlayed[viewIndex],motion=m?captureMovedPiece(m,history[viewIndex]):null;
+ viewIndex++;selected=-1;render();animateMovedPiece(m,motion);
+};
 // Touch-Ziehen auf Android: Startfeld merken und Zielfeld über elementFromPoint bestimmen.
 let touchOrigin=-1,touchStartX=0,touchStartY=0;
 const boardElement=document.getElementById("board");
@@ -223,7 +176,7 @@ document.getElementById("addTime").onclick=()=>{if(rated)return;const i=current(
 const originalUndo=document.getElementById("undo").onclick;
 document.getElementById("undo").onclick=()=>{if(viewIndex>0){viewIndex--;selected=-1;render();}};
 document.getElementById("takeback").onclick=()=>{if(!rated&&history.length>1)originalUndo();};
-document.getElementById("flipBoard").onclick=()=>{flipped=!flipped;render();};
+document.getElementById("flipBoard").onclick=()=>{stopPieceAnimation();flipped=!flipped;render();};
 document.getElementById("settingsButton").onclick=()=>{const el=document.getElementById("settingsPanel");el.hidden=!el.hidden;};
 document.getElementById("statsButton").onclick=()=>document.getElementById("historyPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
 document.getElementById("coachButton").onclick=()=>{document.getElementById("settingsPanel").hidden=false;document.getElementById("coachButton").textContent="🔇 Coach";};
