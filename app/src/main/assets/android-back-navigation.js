@@ -6,6 +6,7 @@ window.schachNovaGoBack=function(){
  if(visible('simultanPanel'))return click('simultanClose');
  if(visible('reviewOverview'))return click('overviewClose')||click('reviewBack');
  if(visible('reviewScreen'))return click('reviewBack');
+ if(visible('coordinateScreen'))return click('coordinateBack');
  if(visible('trainingScreen'))return click('trainingBack')||click('trainingExit');
  if(visible('gameScreen'))return click('backHome');
  const home=document.getElementById('homeScreen');

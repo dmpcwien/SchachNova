@@ -11,9 +11,9 @@
  function best(){try{return Math.max(0,Math.floor(Number(localStorage.getItem(KEY))||0));}catch(_){return 0;}}
  function saveBest(){try{if(score>best())localStorage.setItem(KEY,String(score));}catch(_){}}
  function feedback(text){$("coordinateFeedback").textContent=text;}
- function stop(){
+ function stop(completed=false){
   if(timer){clearInterval(timer);timer=null;}
-  if(running&&mode==="speed")saveBest();
+  if(completed&&running&&mode==="speed")saveBest();
   running=false;
   $("coordinateStart").textContent="▶ Neustarten";
   $("coordinateBest").textContent=best()+" Punkte";
@@ -22,7 +22,7 @@
   if(!running||mode!=="speed")return;
   const left=Math.max(0,Math.ceil((endAt-Date.now())/1000));
   $("coordinateRemaining").textContent=left+" s";
-  if(left===0){stop();feedback("Zeit abgelaufen · "+score+" richtige Felder · "+wrong+" Fehler");}
+  if(left===0){stop(true);feedback("Zeit abgelaufen · "+score+" richtige Felder · "+wrong+" Fehler");}
  }
  function draw(){
   board.replaceChildren();
