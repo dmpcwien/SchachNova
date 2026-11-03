@@ -118,37 +118,18 @@ function renderTraining(){
   line.setAttribute("stroke","#a6df59");line.setAttribute("stroke-width","2.6");line.setAttribute("stroke-linecap","round");line.setAttribute("marker-end","url(#trainingArrowHead)");svg.append(line);board.append(svg);
  }
 }
-let activeTrainingAnimation=null;
-function animateTrainingMove(m,piece){
- const board=$("trainingBoard");if(!board||!m||!piece)return Promise.resolve();
- const flipped=active.opening&&active.data.side===-1;
- const cell=i=>board.children[(flipped?7-(i>>4):(i>>4))*8+(flipped?7-(i&7):(i&7))];
- const from=cell(m[0]),to=cell(m[1]);
- const target=to?.querySelector(".piece-img");
- if(!from||!to||!target||!target.animate)return Promise.resolve();
- if(activeTrainingAnimation){activeTrainingAnimation.finish();activeTrainingAnimation=null;}
- const br=board.getBoundingClientRect(),fr=from.getBoundingClientRect(),tr=to.getBoundingClientRect();
- const overlay=document.createElement("div");
- overlay.className="piece-motion-overlay";
- overlay.style.cssText="position:absolute;inset:0;pointer-events:none;z-index:50;overflow:visible;";
- const sprite=document.createElement("div");
- sprite.style.cssText="position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none;will-change:transform;";
- sprite.style.left=(fr.left-br.left)+"px";sprite.style.top=(fr.top-br.top)+"px";
- sprite.style.width=fr.width+"px";sprite.style.height=fr.height+"px";
- const image=target.cloneNode(true);
- image.style.cssText="display:block!important;width:96%!important;height:96%!important;max-width:96%!important;max-height:96%!important;object-fit:contain!important;";
- sprite.append(image);overlay.append(sprite);
- board.style.position="relative";board.append(overlay);target.style.visibility="hidden";
- const dx=tr.left-fr.left,dy=tr.top-fr.top;
- const duration=Math.min(430,Math.max(190,165+Math.hypot((m[1]&7)-(m[0]&7),(m[1]>>4)-(m[0]>>4))*32));
- return new Promise(resolve=>{
-  let done=false,animation;
-  const cleanup=()=>{if(done)return;done=true;overlay.remove();target.style.visibility="";if(activeTrainingAnimation===animation)activeTrainingAnimation=null;resolve();};
-  animation=sprite.animate([{transform:"translate3d(0,0,0)"},{transform:"translate3d("+dx+"px,"+dy+"px,0)"}],{duration,easing:"cubic-bezier(.32,.05,.24,1)",fill:"forwards"});
-  activeTrainingAnimation=animation;animation.onfinish=cleanup;animation.oncancel=cleanup;
- });
+/* Source-first animation for every training opening, exercise and board orientation. */
+const trainingCell=i=>{
+ const board=$("trainingBoard"),flipped=active?.opening&&active.data.side===-1;
+ return board?.children[(flipped?7-(i>>4):(i>>4))*8+(flipped?7-(i&7):(i&7))]||null;
+};
+function applyTrainingMove(m){
+ const api=window.SchachNovaMoveAnimator,board=$("trainingBoard");
+ const animation=api?.capture(board,api.standardMoves(m,state),trainingCell)||null;
+ state=apply(state,m);
+ renderTraining();
+ return api?.play(animation)||Promise.resolve();
 }
-function applyTrainingMove(m){const piece=state.b[m[0]];state=apply(state,m);renderTraining();return animateTrainingMove(m,piece);}
 function endgameResult(){
  if(!active||active.opening)return "";
  const moves=legal(state);
