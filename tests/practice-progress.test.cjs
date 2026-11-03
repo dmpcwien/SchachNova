@@ -52,7 +52,7 @@ assert.equal(p.dayStreak(),1);
 const again=createPractice(memory,()=>time);
 assert.equal(again.isFavorite(line),true);
 assert.equal(again.goal(),5);
-assert.equal(again.dayCount(),6);
+assert.equal(again.dayCount(),5); // Five correct moves were made on the last simulated day.
 assert.equal(again.dayStreak(),1);
 assert.ok(raw.includes("schachnova")===false,"store does not unnecessarily duplicate key names");
 raw="{bad json";
