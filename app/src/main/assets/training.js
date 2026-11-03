@@ -32,8 +32,12 @@ function posFen(s){let rows=[];for(let r=0;r<8;r++){let row="",n=0;for(let c=0;c
 function label(t){$("trainingMessage").textContent=t;}
 function stopWorker(){if(worker){worker.terminate();worker=null;}busy=false;}
 function showMenu(group){
- updatePracticeDashboard();
  trainingFinished=false;stopWorker();active=null;$("trainingBoardArea").hidden=true;$("trainingList").hidden=false;
+ updatePracticeDashboard();
+ const wrap=$("trainingSearchWrap"),field=$("trainingSearch");
+ const searchable=["e4","d4","other","endgames","favorites","review"].includes(group);
+ if(wrap)wrap.hidden=!searchable;
+ if(field){if(field.dataset.group!==group)field.value="";field.dataset.group=group;}
  const names={home:"🎯 Schachtraining",openings:"📚 Eröffnungen",e4:"1. e4 · Eröffnungen",d4:"1. d4 · Eröffnungen",other:"Andere Eröffnungen",endgames:"♟ Endspiele",review:"⏳ Heute wiederholen",favorites:"⭐ Mein Repertoire"};
  $("trainingTitle").textContent=names[group]||"Schachtraining";
  const root=$("trainingList");root.replaceChildren();
@@ -59,8 +63,18 @@ function showMenu(group){
    row.append(star);root.append(row);
   }else root.append(b);
  }
+ filterTraining();
  $("trainingBack").onclick=()=>group==="home"?exit():showMenu(["e4","d4","other"].includes(group)?"openings":"home");
 }
+function filterTraining(){
+ const list=$("trainingList"),wrap=$("trainingSearchWrap"),field=$("trainingSearch"),empty=$("trainingSearchEmpty");
+ if(!list||!field||!wrap||wrap.hidden)return;
+ const normalize=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("de").trim();
+ const query=normalize(field.value);let visible=0;
+ for(const item of list.children){item.hidden=!!query&&!normalize(item.textContent).includes(query);if(!item.hidden)visible++;}
+ if(empty)empty.hidden=visible>0;
+}
+$("trainingSearch")?.addEventListener("input",filterTraining);
 function updatePracticeDashboard(){
  const panel=$("trainingDashboard");if(!panel||!practice)return;
  const d=practice.summary(opening);panel.hidden=false;
