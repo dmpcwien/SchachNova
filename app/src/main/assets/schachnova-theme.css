@@ -956,3 +956,9 @@ body[data-board-skin="warmwood"] #trainingBoard>.sq.lastmove{background:rgba(255
 body[data-piece-skin="warmwood"] :is(.piece-img,.review-piece,.simultan-piece),
 body[data-piece-skin="mochi"] :is(.piece-img,.review-piece,.simultan-piece),
 body[data-piece-skin="mellow"] :is(.piece-img,.review-piece,.simultan-piece){filter:drop-shadow(0 2px 2px #0006)!important}
+
+/* Rating comparison (self-contained offline panel). */
+#ratingConverterPanel .rating-controls{display:grid;gap:14px;max-width:540px;margin:16px auto}
+#ratingConverterPanel .rating-controls label{display:grid;gap:7px;color:#dceafb;font-size:14px;font-weight:650}
+#ratingConverterPanel .rating-controls input,#ratingConverterPanel .rating-controls select{min-height:46px;width:100%;background:#102849;border:1px solid #609fdd;color:#fff;border-radius:10px;padding:10px;font-size:16px}
+#ratingConverterResult{max-width:540px;margin:18px auto;padding:16px;background:#132f58;border-radius:12px;font-size:17px;font-weight:700}
