@@ -26,7 +26,7 @@ function saveSession(){
  try{
   if(!games.length)return;
   const data={version:1,active,autoSwitch,games:games.map(g=>({
-   humanColor:g.humanColor,strength:g.strength,moves:g.moves.map(notation)
+   humanColor:g.humanColor,strength:g.strength,moves:g.moves.map(notation),finished:g.finished
   }))};
   localStorage.setItem(storageKey,JSON.stringify(data));
  }catch(e){console.warn("Simultan-Sicherung fehlgeschlagen",e);}
@@ -46,7 +46,7 @@ function loadSession(){
     if(!move)throw Error("Ungültiger gespeicherter Zug");
     g.moves.push(move);g.history.push(applyStandard(state(g),move));
    }
-   g.finished=status(g);return g;
+   g.finished=status(g);if(!g.finished&&typeof item.finished==="string"&&item.finished==="Remis ("+drawClaimReason(g)+")"&&drawClaimReason(g))g.finished=item.finished;return g;
   });
   games=restored;active=Number.isInteger(data.active)?Math.min(games.length-1,Math.max(0,data.active)):0;
   autoSwitch=data.autoSwitch!==false;if(autoToggle)autoToggle.checked=autoSwitch;
