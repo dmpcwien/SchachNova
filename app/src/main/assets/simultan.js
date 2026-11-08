@@ -88,27 +88,75 @@ function status(g){
  if(repeatCount(g)>=5)return "Remis (fünffache Stellungswiederholung)";
  return "";
 }
+/* Reuse the board's 64 squares and existing cards to avoid DOM churn during a 20-board session. */
 function drawCards(){
- grid.replaceChildren();
+ if(grid.children.length!==games.length){
+  grid.replaceChildren();
+  games.forEach((g,i)=>{const button=document.createElement("button");button.type="button";button.className="simultan-card";button.onclick=()=>showBoard(i,true);grid.append(button);});
+ }
  let won=0,lost=0,drawn=0,done=0;
  games.forEach((g,i)=>{
   if(g.finished){done++;if(g.finished.startsWith("Remis")||g.finished==="Patt")drawn++;
    else if(g.finished==="Schachmatt"){const winner=-state(g).t;if(winner===g.humanColor)won++;else lost++;}
   }
-  const b=document.createElement("button");b.type="button";
-  b.className="simultan-card"+(i===active?" active":"")+(g.finished?" finished":"");
-  b.textContent="Brett "+(i+1)+" · "+(g.finished|| (g.awaitingSwitch?"Wechsel folgt":state(g).t===g.humanColor?"Du bist dran":"Bot denkt"))+" · Stärke "+g.strength;
-  b.setAttribute("aria-current",i===active?"true":"false");b.setAttribute("aria-label",b.textContent);
-  b.onclick=()=>showBoard(i,true);grid.append(b);
+  const button=grid.children[i],label="Brett "+(i+1)+" · "+(g.finished||
+   (g.awaitingSwitch?"Wechsel folgt":state(g).t===g.humanColor?"Du bist dran":"Bot denkt"))+" · Stärke "+g.strength;
+  const className="simultan-card"+(i===active?" active":"")+(g.finished?" finished":"");
+  if(button.textContent!==label)button.textContent=label;
+  if(button.className!==className)button.className=className;
+  button.setAttribute("aria-current",i===active?"true":"false");
+  button.setAttribute("aria-label",label);
  });
- if(summary)summary.textContent="Abgeschlossen "+done+"/"+games.length+" · Siege "+won+" · Niederlagen "+lost+" · Remis "+drawn;
+ const text="Abgeschlossen "+done+"/"+games.length+" · Siege "+won+" · Niederlagen "+lost+" · Remis "+drawn;
+ if(summary&&summary.textContent!==text)summary.textContent=text;
+}
+function ensureSquares(){
+ if(board.children.length===64)return;
+ board.replaceChildren();
+ for(let j=0;j<64;j++){
+  const cell=document.createElement("button");
+  cell.type="button";cell.className="simultan-square";
+  board.append(cell);
+ }
 }
 function draw(preserveMotion=false){
- if(!preserveMotion)stopMotion();drawCards();
- board.replaceChildren();const g=games[active];if(!g)return;
- const s=state(g),inCheck=checkStandard(s),kingSquare=inCheck?s.b.indexOf(s.t===1?"K":"k"):-1,moves=s.t===g.humanColor&&!g.finished&&!g.awaitingSwitch?legalStandard(s):[],targets=moves.filter(m=>m[0]===selected).map(m=>m[1]),last=g.moves[g.moves.length-1];
- for(let j=0;j<64;j++){const i=g.humanColor===1?(j>>3)*16+(j&7):(7-(j>>3))*16+(7-(j&7)),p=s.b[i],cell=document.createElement("button");cell.type="button";cell.className="simultan-square "+(((j>>3)+(j&7))%2?"dark":"light")+(selected===i?" selected":"")+(targets.includes(i)?" target":"")+(last&&(last[0]===i||last[1]===i)?" last-move":"")+(i===kingSquare?" in-check":"");if(i===kingSquare){cell.style.setProperty("background-color","#d93030","important");cell.style.boxShadow="inset 0 0 0 4px #ffb4b4";}if(p!=="."){const img=document.createElement("img");img.className="simultan-piece";img.src="pieces/"+(p===p.toUpperCase()?"w":"b")+p.toUpperCase()+".svg";img.alt=glyph[p];img.draggable=false;cell.append(img);}cell.dataset.square=String(i);cell.setAttribute("aria-label",files[i&7]+(8-(i>>4)));cell.setAttribute("aria-pressed",selected===i?"true":"false");cell.onclick=()=>choose(i);board.append(cell);}
- window.SchachNovaMaterial?.render(board,s,g.humanColor===-1);strength.value=String(g.strength);if(claimButton){const claim=!g.finished&&s.t===g.humanColor?drawClaimReason(g):"";claimButton.hidden=!claim;claimButton.textContent=claim?"Remis beanspruchen: "+claim:"Remis beanspruchen";}info.textContent="Brett "+(active+1)+" von "+games.length+" · "+(g.finished||(g.awaitingSwitch?"Wechsel folgt":s.t===g.humanColor?"Du bist am Zug":"Computer überlegt"))+" · Deine Farbe: "+(g.humanColor===1?"Weiß":"Schwarz")+" · Bot-Stärke "+g.strength+(g.engineMode==="fallback"?" · Ersatzgegner":g.engineMode==="stockfish"?" · Stockfish":"");
+ if(!preserveMotion)stopMotion();
+ drawCards();ensureSquares();
+ const g=games[active];if(!g)return;
+ const s=state(g),inCheck=checkStandard(s),kingSquare=inCheck?s.b.indexOf(s.t===1?"K":"k"):-1;
+ const moves=s.t===g.humanColor&&!g.finished&&!g.awaitingSwitch?legalStandard(s):[];
+ const targets=new Set(moves.filter(m=>m[0]===selected).map(m=>m[1]));
+ const last=g.moves[g.moves.length-1];
+ for(let j=0;j<64;j++){
+  const i=g.humanColor===1?(j>>3)*16+(j&7):(7-(j>>3))*16+(7-(j&7));
+  const p=s.b[i],cell=board.children[j],isCheck=i===kingSquare;
+  const className="simultan-square "+(((j>>3)+(j&7))%2?"dark":"light")+
+   (selected===i?" selected":"")+(targets.has(i)?" target":"")+
+   (last&&(last[0]===i||last[1]===i)?" last-move":"")+(isCheck?" in-check":"");
+  if(cell.className!==className)cell.className=className;
+  if(isCheck){cell.style.setProperty("background-color","#d93030","important");cell.style.boxShadow="inset 0 0 0 4px #ffb4b4";}
+  else{cell.style.removeProperty("background-color");cell.style.boxShadow="";}
+  const piece=cell.querySelector(".simultan-piece");
+  if(p==="."){if(piece)piece.remove();}
+  else if(!piece||piece.dataset.piece!==p){
+   if(piece)piece.remove();
+   const img=document.createElement("img");
+   img.className="simultan-piece";img.src="pieces/"+(p===p.toUpperCase()?"w":"b")+p.toUpperCase()+".svg";
+   img.dataset.piece=p;img.alt=glyph[p];img.draggable=false;cell.append(img);
+  }
+  cell.dataset.square=String(i);
+  cell.setAttribute("aria-label",files[i&7]+(8-(i>>4)));
+  cell.setAttribute("aria-pressed",selected===i?"true":"false");
+  cell.onclick=()=>choose(i);
+ }
+ window.SchachNovaMaterial?.render(board,s,g.humanColor===-1);
+ strength.value=String(g.strength);
+ if(claimButton){const claim=!g.finished&&s.t===g.humanColor?drawClaimReason(g):"";
+  claimButton.hidden=!claim;claimButton.textContent=claim?"Remis beanspruchen: "+claim:"Remis beanspruchen";}
+ info.textContent="Brett "+(active+1)+" von "+games.length+" · "+(g.finished||
+  (g.awaitingSwitch?"Wechsel folgt":s.t===g.humanColor?"Du bist am Zug":"Computer überlegt"))+
+  " · Deine Farbe: "+(g.humanColor===1?"Weiß":"Schwarz")+" · Bot-Stärke "+g.strength+
+  (g.engineMode==="fallback"?" · Ersatzgegner":g.engineMode==="stockfish"?" · Stockfish":"");
 }
 /* Pointer-based move entry mirrors the main board without altering its geometry. */
 let dragStart=-1,dragPointer=null,dragX=0,dragY=0,suppressTap=false,dragBoard=-1;
