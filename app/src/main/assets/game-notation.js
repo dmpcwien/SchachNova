@@ -50,7 +50,13 @@
   const date=new Date(game.timestamp);
   const ymd=Number.isNaN(date.getTime())?"????.??.??":date.getFullYear()+"."+String(date.getMonth()+1).padStart(2,"0")+"."+String(date.getDate()).padStart(2,"0");
   const result=classical?resultOf(game,rules):"*";
-  const tags=['[Event "SchachNova Offline"]','[Site "Android"]','[Date "'+ymd+'"]','[White "Weiß"]','[Black "Schwarz"]','[Result "'+result+'"]'];
+  const tags=['[Event "'+escapeTag(game.event||"SchachNova Offline")+'"]','[Site "Android"]','[Date "'+ymd+'"]'];
+  if(game.round!==undefined&&game.round!==null)tags.push('[Round "'+escapeTag(game.round)+'"]');
+  tags.push('[White "'+escapeTag(game.white||"Weiß")+'"]','[Black "'+escapeTag(game.black||"Schwarz")+'"]','[Result "'+result+'"]');
+  if(classical&&typeof game.timeControl==="string"&&/^\\d+\\+\\d+$/.test(game.timeControl))
+   tags.push('[TimeControl "'+game.timeControl+'"]');
+  if(classical&&String(game.message||"").startsWith("Zeitüberschreitung ("))
+   tags.push('[Termination "Time forfeit"]');
   if(!classical)tags.push('[Variant "'+escapeTag(game.variant)+'"]');
   const parts=[];
   for(let i=0;i<moves.length;i++){
