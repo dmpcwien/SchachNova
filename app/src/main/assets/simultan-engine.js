@@ -42,7 +42,7 @@ function onLine(line){
  if(!line.startsWith("bestmove ")||!pending)return;
  const choice=line.split(/\s+/)[1];
  const request=pending;pending=null;clearWatch();
- request.resolve(validMove(choice)?choice:null);
+ request.resolve(request.cancelled?null:validMove(choice)?choice:null);
  next();
 }
 function boot(){
@@ -68,6 +68,19 @@ function request(moves,strength,options={}){
   boot();next();
  });
 }
+function cancelBoard(boardId){
+ if(!Number.isInteger(boardId)||boardId<0)return 0;
+ let cancelled=0;
+ for(let i=queue.length-1;i>=0;i--)if(queue[i].boardId===boardId){
+  const job=queue.splice(i,1)[0];job.cancelled=true;job.resolve(null);cancelled++;
+ }
+ if(pending?.boardId===boardId&&!pending.cancelled){
+  pending.cancelled=true;cancelled++;
+  try{worker?.postMessage("stop");}catch(_){}
+ }
+ if(!pending)next();
+ return cancelled;
+}
 function prioritize(boardId){
  const index=queue.findIndex(job=>job.boardId===boardId);
  if(index<0)return false;
@@ -75,7 +88,7 @@ function prioritize(boardId){
  return true;
 }
 window.SchachNovaSimultanEngine=Object.freeze({
- request,prioritize,
+ request,prioritize,cancelBoard,
  reset(){stop(true);},
  get state(){return {available:!disabled,ready,queue:queue.length,thinking:!!pending};}
 });
