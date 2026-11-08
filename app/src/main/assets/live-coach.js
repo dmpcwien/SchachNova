@@ -3,7 +3,7 @@
 "use strict";
 const $=id=>document.getElementById(id);
 const panel=$("liveCoachPanel"),message=$("liveCoachMessage"),toggle=$("coachButton");
-let enabled=false,worker=null,task=null,phase=0,cp=null,best=null,serial=0,timeoutId=null;
+let enabled=false,worker=null,task=null,phase=0,cp=null,best=null,serial=0,timeoutId=null,pendingAdvice=null;
 const coord=i=>"abcdefgh"[i&7]+(8-(i>>4));
 const uci=m=>coord(m[0])+coord(m[1])+(m[2]||"");
 function fen(s){
@@ -60,28 +60,42 @@ function startTask(){
 function enable(value){
  enabled=value;toggle.textContent=enabled?"🟢 Coach an":"💡 Coach";
  panel.hidden=!enabled;
- if(!enabled){shutdown();return;}
+ if(!enabled){pendingAdvice=null;shutdown();return;}
  if(variantMode!=="standard"){say("Der Live-Coach unterstützt derzeit klassisches Schach.");return;}
- say(window.schachNovaCoachMatch?"Coach aktiv: Du spielst Weiß, der Computer spielt Schwarz. Ich analysiere deine Züge und erkläre bessere Alternativen.":"Coach aktiv. Prüfe vor jedem Zug Schachgebote, ungedeckte Figuren und Drohungen. Nach deinem Zug analysiere ich die Stellung.");
+ say(window.schachNovaCoachMatch?"Coach aktiv: Du spielst "+(window.schachNovaBotColor===1?"Schwarz, der Computer Weiß":"Weiß, der Computer Schwarz")+". Ich analysiere deine Züge und erkläre bessere Alternativen.":"Coach aktiv. Prüfe vor jedem Zug Schachgebote, ungedeckte Figuren und Drohungen. Nach deinem Zug analysiere ich die Stellung.");
 }
 toggle.onclick=()=>enable(!enabled);
 window.SchachNovaLiveCoach={enable,isEnabled:()=>enabled};
+function analyzeHumanMove(advice){
+ shutdown();
+ task=advice;
+ say("Zug "+advice.move+" – Stockfish prüft deine Entscheidung …");
+ startTask();
+}
 const baseMove=move;
 move=function(m){
  const before=current(),previous=movesPlayed.length;
  baseMove(m);
  if(!enabled||variantMode!=="standard"||movesPlayed.length!==previous+1)return;
- // Only critique the human player's own decision. A delayed computer response
- // must not cancel and replace the still-running analysis of the human move.
  const botColor=window.schachNovaBotColor===1?1:-1;
- if($("botMode")?.value==="bot"&&before.t===botColor)return;
- if(window.schachNovaCoachMatch)window.schachNovaBotKickoff?.();
- shutdown();
- task={states:[before,current()],move:uci(m),color:before.t,before:null,after:null};
- say("Zug "+uci(m)+" – Stockfish prüft deine Entscheidung …");
- startTask();
+ const botMatch=$("botMode")?.value==="bot";
+ if(botMatch&&before.t===botColor){
+  // Only after the computer has played: analyse the earlier human move.
+  // Avoid two Stockfish workers competing for CPU and memory on Android.
+  if(pendingAdvice){const advice=pendingAdvice;pendingAdvice=null;analyzeHumanMove(advice);}
+  return;
+ }
+ const advice={states:[before,current()],move:uci(m),color:before.t,before:null,after:null};
+ if(window.schachNovaCoachMatch&&botMatch&&!ended){
+  pendingAdvice=advice;
+  say("Zug "+advice.move+" gespeichert. Computergegner antwortet …");
+  window.schachNovaBotKickoff?.();
+  return;
+ }
+ pendingAdvice=null;
+ analyzeHumanMove(advice);
 };
 const baseNew=$("newGame").onclick;
-$("newGame").onclick=()=>{shutdown();baseNew();if(enabled)say("Neue Partie. Ich analysiere wieder jeden Zug.");};
+$("newGame").onclick=()=>{pendingAdvice=null;shutdown();baseNew();if(enabled)say("Neue Partie. Ich analysiere wieder jeden Zug.");};
 $("backHome").addEventListener("click",()=>{shutdown();});
 })();
