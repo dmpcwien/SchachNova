@@ -53,7 +53,7 @@
   const tags=['[Event "'+escapeTag(game.event||"SchachNova Offline")+'"]','[Site "Android"]','[Date "'+ymd+'"]'];
   if(game.round!==undefined&&game.round!==null)tags.push('[Round "'+escapeTag(game.round)+'"]');
   tags.push('[White "'+escapeTag(game.white||"Weiß")+'"]','[Black "'+escapeTag(game.black||"Schwarz")+'"]','[Result "'+result+'"]');
-  if(classical&&typeof game.timeControl==="string"&&/^\\d+\\+\\d+$/.test(game.timeControl))
+  if(classical&&typeof game.timeControl==="string"&&/^\d+\+\d+$/.test(game.timeControl))
    tags.push('[TimeControl "'+game.timeControl+'"]');
   if(classical&&String(game.message||"").startsWith("Zeitüberschreitung ("))
    tags.push('[Termination "Time forfeit"]');
