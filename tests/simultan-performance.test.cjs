@@ -29,7 +29,7 @@ const games=Array.from({length:20},(_,i)=>({
  humanColor:i%2?1:-1,strength:i,finished:"",awaitingSwitch:false,thinking:false,
  history:[{t:1}]
 }));
-const view={grid,board,summary,games,active:0,sessionTools:require("../app/src/main/assets/simultan-tools.js"),document:{createElement:()=>element()},
+const view={grid,board,summary,games,active:0,botsPaused:false,sessionTools:require("../app/src/main/assets/simultan-tools.js"),document:{createElement:()=>element()},
  state:g=>g.history[g.history.length-1]
 };
 vm.createContext(view);
