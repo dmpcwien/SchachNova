@@ -64,3 +64,13 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - Ein gemeinsamer Stockfish-19-Worker bearbeitet Computerzüge aller Bretter nacheinander. Bei Engine-Ausfall schaltet der Simultan-Modus auf den ausgewiesenen lokalen Ersatzgegner um.
 - Neue Regressionstests für Sitzungs-Wiederherstellung, beschädigte Speicherdaten und Engine-Warteschlange.
 - **Wichtig:** Für die Nutzung der Stockfish-Engine muss die APK aus dem vollständigen GitHub-Actions-Build stammen, der die Engine-Dateien einbindet. Ein bestandener Quellcode-Test allein bestätigt nicht die Engine-Ausführung auf jedem Android-Gerät.
+
+## Simultan-Leistung und Energiesparen (1.0.10)
+- Die Simultan-Ansicht verwendet unveränderte Brettfelder und Brettkacheln wieder; sichtbare Inhalte werden selektiv aktualisiert, statt bei jedem Zug 64 neue Buttons anzulegen.
+- Engine-Züge des aktuell gewählten Bretts können in der Warteschlange vorgezogen werden; weiterhin nur **ein** Stockfish-Worker gleichzeitig.
+- Wenn die App in den Hintergrund wechselt oder der Simultan-Bildschirm geschlossen wird, werden Engine-Aufträge und Timers angehalten; beim Öffnen werden ausschließlich noch erforderliche Computerzüge neu gestartet.
+- Ein ungenutzter Engine-Worker wird nach 15 Sekunden freigegeben, um Speicherressourcen zu schonen.
+- Kein Vibrationsfeedback mehr für unsichtbare Bretter oder Hintergrundzüge.
+- Veraltete asynchrone Antworten dürfen einen neu gestarteten Bot-Denkzustand nicht überschreiben.
+- 20-Bretter-Stresstest, DOM-Reuse-Test und Lifecycle-Test in `tests/simultan-20-board.test.cjs` und `tests/simultan-performance.test.cjs`.
+- **Messgrenze:** Die Tests bestätigen das Verhalten des Codes, nicht gemessene CPU-Last, FPS oder Akkulaufzeit auf realen Android-Geräten. Für eine solche Aussage sind Gerätemessungen notwendig.
