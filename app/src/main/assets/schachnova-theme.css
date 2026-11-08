@@ -1010,3 +1010,20 @@ body[data-piece-skin="mellow"] :is(.piece-img,.review-piece,.simultan-piece){fil
 .coordinate-feedback{border-radius:11px;padding:11px;background:#0f2d51;color:#d6eafd;min-height:43px;line-height:1.5;font-size:13px}
 .coordinate-start{display:block;width:100%;background:#267dd1;color:#fff;border:1px solid #94cfff;border-radius:12px;padding:13px;font-weight:750;font-size:16px;min-height:47px}
 .coordinate-record{font-size:12px;color:#acc8e0;margin-top:12px}
+
+/* Simultan session recovery and promotion controls. */
+#simultanPanel .simultan-notice:empty{display:none}
+#simultanPanel .simultan-notice{font-size:12px;line-height:1.25;color:#c1e4ff}
+#simultanPanel .simultan-summary{flex:0 0 auto;font-size:12px;line-height:1.3;font-weight:600;color:#f1f7ff;padding:2px 0}
+#simultanPanel .simultan-auto-label{display:flex;align-items:center;gap:5px;min-height:40px}
+#simultanPanel .simultan-auto-label input{width:20px;height:20px;accent-color:#65b7ff}
+#simultanPanel .simultan-card.finished{color:#dae5ee;background:#24384c;border-color:#648095}
+#simultanPanel .simultan-card.finished.active{background:#2c567c;border-color:#a4dcff}
+#simultanPanel .simultan-promotion[hidden]{display:none!important}
+#simultanPanel .simultan-promotion{position:fixed;inset:0;z-index:1300;background:#05121eea;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;padding:20px}
+#simultanPanel .simultan-promotion p{font-weight:700;font-size:19px;margin:0}
+#simultanPanel .simultan-promotion>div{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:410px}
+#simultanPanel .simultan-promotion button{min-height:48px;border-radius:10px;padding:10px 14px;background:#1b517f;color:white;border:1px solid #90ceff}
+#simultanPanel .simultan-promotion button:focus-visible{outline:3px solid #ffdd57}
+#simultanPanel .simultan-board{width:min(100%,calc(100dvh - 342px),540px)!important;max-height:calc(100dvh - 342px)}
+@media(max-height:720px){#simultanPanel .simultan-board{width:min(100%,calc(100dvh - 295px),540px)!important;max-height:calc(100dvh - 295px)}}
