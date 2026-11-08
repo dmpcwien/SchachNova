@@ -51,7 +51,7 @@ const paused={
  panel:{hidden:false},document:{hidden:true},
  window:{SchachNovaSimultanEngine:{reset(){paused.resets++;}}},
  resets:0,cancelSwitch(){paused.switchCancels++;},switchCancels:0,
- stopMotion(){},clearTimeout(){paused.timersCleared++;},timersCleared:0,
+ stopMotion(){},freezeClocks(){paused.frozen++;},frozen:0,resumeClocks(){paused.resumed++;},resumed:0,clearTimeout(){paused.timersCleared++;},timersCleared:0,
  saveSession(){paused.saved++;},saved:0,
  state:g=>g.history[g.history.length-1],botMove(){paused.started++;},started:0
 };
