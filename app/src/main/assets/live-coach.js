@@ -39,8 +39,8 @@ function startTask(){
    for(const raw of String(e.data??"").split(/\r?\n/)){
    const line=raw.trim();
    if(!line)continue;
-   if(line==="uciok"){worker.postMessage("isready");return;}
-   if(line==="readyok"){evaluate();return;}
+   if(line==="uciok"){worker.postMessage("isready");continue;}
+   if(line==="readyok"){evaluate();continue;}
    if(line.startsWith("info ")&&line.includes(" score ")){
     const m=line.match(/score (cp|mate) (-?\d+)/);
     if(m){const n=Number(m[2]);cp=(m[1]==="cp"?n:Math.sign(n)*10000)*task.states[phase].t;}
