@@ -74,3 +74,12 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - Veraltete asynchrone Antworten dürfen einen neu gestarteten Bot-Denkzustand nicht überschreiben.
 - 20-Bretter-Stresstest, DOM-Reuse-Test und Lifecycle-Test in `tests/simultan-20-board.test.cjs` und `tests/simultan-performance.test.cjs`.
 - **Messgrenze:** Die Tests bestätigen das Verhalten des Codes, nicht gemessene CPU-Last, FPS oder Akkulaufzeit auf realen Android-Geräten. Für eine solche Aussage sind Gerätemessungen notwendig.
+
+## Simultan-Leistungsprofile (1.0.11)
+- Rechenzeit des gemeinsamen Stockfish-Workers in drei Profilen: **Sparsam**, **Ausgewogen** und **Stärker**. Das gewählte Profil ändert den pro Zug erlaubten Rechenaufwand, nicht die eingestellte Bot-Stärke (0–20).
+- Sparsam: 120–280 ms Suchbudget pro Computerzug; Ausgewogen: 240–520 ms; Stärker: 420–980 ms. Das tatsächliche Laufzeitverhalten kann je nach Android-Gerät und Worker-Verzögerung abweichen.
+- Die Engine nutzt auf ihrem Worker ein UCI-Hash-Limit von 16 MiB; weiterhin nur eine aktive Suche über alle Bretter.
+- Neue Taste **Computer pausieren / fortsetzen**: Laufende und wartende Computerberechnungen werden gestoppt; nach Fortsetzung anhand des gesicherten Spielstands neu gestartet.
+- Energieprofil und manuelle Pause werden in der bestehenden Simultan-Sitzung gespeichert; ältere gespeicherte Sitzungen laden kompatibel mit Standardeinstellung „Ausgewogen“.
+- UI-Tasten mit mindestens 44 px Höhe, Regressionstests für Rechenzeitprofile und Pausenstatus.
+- **Keine Behauptung einer bestimmten Akkueinsparung:** Das geringere Suchbudget ist im Code nachgewiesen, Akkumessungen müssen mit einer installierten APK auf einem echten Android-Gerät erfolgen.
