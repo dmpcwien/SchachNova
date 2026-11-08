@@ -36,7 +36,9 @@ function startTask(){
  try{worker=new Worker("stockfish-19-lite-single.js");
   worker.onmessage=e=>{
    if(id!==serial||!enabled||!task)return;
-   const line=String(e.data);
+   for(const raw of String(e.data??"").split(/\r?\n/)){
+   const line=raw.trim();
+   if(!line)continue;
    if(line==="uciok"){worker.postMessage("isready");return;}
    if(line==="readyok"){evaluate();return;}
    if(line.startsWith("info ")&&line.includes(" score ")){
@@ -47,6 +49,7 @@ function startTask(){
     const entry={cp:cp===null?0:cp,best:line.split(" ")[1]};
     if(phase===0){task.before=entry;phase=1;evaluate();}
     else{task.after=entry;explain();worker.terminate();worker=null;task=null;if(timeoutId)clearTimeout(timeoutId);timeoutId=null;}
+   }
    }
   };
   worker.onerror=()=>{say("Die Offline-Engine konnte nicht gestartet werden.");shutdown();};
@@ -59,7 +62,7 @@ function enable(value){
  panel.hidden=!enabled;
  if(!enabled){shutdown();return;}
  if(variantMode!=="standard"){say("Der Live-Coach unterstützt derzeit klassisches Schach.");return;}
- say("Coach aktiv. Prüfe vor jedem Zug Schachgebote, ungedeckte Figuren und Drohungen. Nach deinem Zug analysiere ich die Stellung.");
+ say(window.schachNovaCoachMatch?"Coach aktiv: Du spielst Weiß, der Computer spielt Schwarz. Ich analysiere deine Züge und erkläre bessere Alternativen.":"Coach aktiv. Prüfe vor jedem Zug Schachgebote, ungedeckte Figuren und Drohungen. Nach deinem Zug analysiere ich die Stellung.");
 }
 toggle.onclick=()=>enable(!enabled);
 window.SchachNovaLiveCoach={enable,isEnabled:()=>enabled};
@@ -72,6 +75,7 @@ move=function(m){
  // must not cancel and replace the still-running analysis of the human move.
  const botColor=window.schachNovaBotColor===1?1:-1;
  if($("botMode")?.value==="bot"&&before.t===botColor)return;
+ if(window.schachNovaCoachMatch)window.schachNovaBotKickoff?.();
  shutdown();
  task={states:[before,current()],move:uci(m),color:before.t,before:null,after:null};
  say("Zug "+uci(m)+" – Stockfish prüft deine Entscheidung …");
