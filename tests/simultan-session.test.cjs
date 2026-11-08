@@ -38,9 +38,10 @@ const context={
 vm.createContext(context);
 const setup=[
  "let games="+JSON.stringify(data)+";",
- "let active=2;let autoSwitch=false;",
+ "let active=2;let autoSwitch=false;let botsPaused=true;let powerMode=\"eco\";",
  "const notation=m=>m[0];",
- 'const autoToggle={checked:true},count={value:""},resumeNotice={textContent:""};',
+ 'const autoToggle={checked:true},count={value:""},resumeNotice={textContent:""},powerSelect={value:""},pauseButton={textContent:"",setAttribute(){}};',
+ 'function updatePauseControl(){pauseButton.textContent=botsPaused?"pausiert":"läuft";}',
  'const fresh=()=>({history:[{}],moves:[],humanColor:1,strength:0,finished:""});',
  "const state=g=>g.history[g.history.length-1];",
  'const legalStandard=s=>[["e2e4"]];',
@@ -49,13 +50,15 @@ const setup=[
  'const drawClaimReason=g=>"";',
  code,
  "saveSession();",
- "games=[];active=0;autoSwitch=true;",
+ "games=[];active=0;autoSwitch=true;botsPaused=false;powerMode=\"balanced\";",
  'if(!loadSession())throw Error("Valid save was rejected");',
- 'if(games.length!==5||active!==2||autoSwitch!==false||games[0].moves.length!==1||count.value!=="5")throw Error("Restoration incorrect");'
+ 'if(games.length!==5||active!==2||autoSwitch!==false||games[0].moves.length!==1||count.value!=="5"||botsPaused!==true||powerMode!=="eco"||powerSelect.value!=="eco")throw Error("Restoration incorrect");'
 ].join("\n");
 vm.runInContext(setup,context);
 assert.equal(JSON.parse(mem[context.storageKey]).games.length,5);
 assert.equal(JSON.parse(mem[context.storageKey]).autoSwitch,false);
+assert.equal(JSON.parse(mem[context.storageKey]).botsPaused,true);
+assert.equal(JSON.parse(mem[context.storageKey]).powerMode,"eco");
 const bad=JSON.parse(mem[context.storageKey]);bad.games[1].moves=["a1a8"];
 mem[context.storageKey]=JSON.stringify(bad);
 vm.runInContext('if(loadSession())throw Error("Illegal persisted move was accepted")',context);
