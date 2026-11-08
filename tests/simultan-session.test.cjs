@@ -8,7 +8,7 @@ const css=fs.readFileSync("app/src/main/assets/schachnova-theme.css","utf8");
 for(const id of ["simultanSummary","simultanAutoSwitch","simultanPromotionDialog","simultanClaimDraw","simultanResumeNotice"])
  assert.ok(html.includes('id="'+id+'"'),"Missing control "+id);
 assert.match(css,/\.simultan-promotion\[hidden\]/);
-assert.match(src,/b\.onclick=\(\)=>showBoard\(i,true\)/,"Finished boards must remain selectable");
+assert.match(src,/button\.onclick=\(\)=>showBoard\(i,true\)/,"Finished boards must remain selectable");
 assert.match(src,/simultan\.v1/);
 assert.match(src,/function standardKey\(s\)/);
 assert.match(src,/repeatCount\(g\)>=5/);
