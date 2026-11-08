@@ -4,7 +4,7 @@ const vm=require("node:vm");
 const assert=require("node:assert/strict");
 const src=fs.readFileSync("app/src/main/assets/simultan-engine.js","utf8");
 const page=fs.readFileSync("app/src/main/assets/index.html","utf8");
-assert.match(page,/<script src="simultan-engine\.js"><\/script><script src="simultan\.js"><\/script>/);
+assert.match(page,/<script src="simultan-engine\.js"><\/script><script src="simultan-tools\.js"><\/script><script src="simultan\.js"><\/script>/);
 assert.match(src,/new Worker\("stockfish-19-lite-single\.js"\)/);
 async function main(){
  const commands=[],workers=[];
