@@ -3,6 +3,9 @@
 "use strict";
 let worker=null,ready=false,pending=null,queue=[],watchdog=null,idleTimer=null,disabled=false;
 const validMove=m=>typeof m==="string"&&/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(m);
+const powerModes=["eco","balanced","strong"];
+const normalizePower=mode=>powerModes.includes(mode)?mode:"balanced";
+const thinkMs=(strength,powerMode)=>powerMode==="eco"?120+strength*8:powerMode==="strong"?420+strength*28:240+strength*14;
 const clearWatch=()=>{if(watchdog!==null){clearTimeout(watchdog);watchdog=null;}};
 const clearIdle=()=>{if(idleTimer!==null){clearTimeout(idleTimer);idleTimer=null;}};
 function releaseIdle(){
@@ -29,12 +32,12 @@ function next(){
  try{
   worker.postMessage("setoption name Skill Level value "+request.strength);
   worker.postMessage("position startpos"+(request.moves.length?" moves "+request.moves.join(" "):""));
-  worker.postMessage("go movetime "+(240+request.strength*14));
+  worker.postMessage("go movetime "+thinkMs(request.strength,request.powerMode));
   watch("Zugberechnung");
  }catch(e){fail(e.message);}
 }
 function onLine(line){
- if(line==="uciok"){worker?.postMessage("isready");return;}
+ if(line==="uciok"){worker?.postMessage("setoption name Hash value 16");worker?.postMessage("isready");return;}
  if(line==="readyok"){if(!ready){ready=true;clearWatch();next();}return;}
  if(!line.startsWith("bestmove ")||!pending)return;
  const choice=line.split(/\s+/)[1];
@@ -60,7 +63,7 @@ function request(moves,strength,options={}){
  const level=Math.max(0,Math.min(20,Math.trunc(Number(strength)||0)));
  const boardId=Number.isInteger(options.boardId)?options.boardId:-1;
  return new Promise(resolve=>{
-  const job={moves:moves.slice(),strength:level,boardId,resolve};
+  const job={moves:moves.slice(),strength:level,boardId,powerMode:normalizePower(options.powerMode),resolve};
   if(options.priority)queue.unshift(job);else queue.push(job);
   boot();next();
  });
