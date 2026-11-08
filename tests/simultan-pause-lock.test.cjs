@@ -18,7 +18,7 @@ assert.match(src,/board\.addEventListener\("pointerup",event=>\{\s*if\(botsPause
 assert.match(src,/const moves=s\.t===g\.humanColor&&!g\.finished&&!g\.awaitingSwitch&&!botsPaused/);
 const g={humanColor:1,finished:"",awaitingSwitch:false,history:[{t:1,b:{3:"P"}}],moves:[]};
 let redraws=0;
-const ctx={suppressTap:false,botsPaused:true,promotionPending:null,games:[g],active:0,selected:-1,
+const ctx={g,suppressTap:false,botsPaused:true,promotionPending:null,games:[g],active:0,selected:-1,
  state:g=>g.history[g.history.length-1],side:()=>1,
  legalStandard:()=>{throw Error("No legality checks during pause");},
  draw:()=>{redraws++;}
