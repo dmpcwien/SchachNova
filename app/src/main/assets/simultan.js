@@ -180,9 +180,11 @@ function drawCards(){
  }
  let won=0,lost=0,drawn=0,done=0;
  games.forEach((g,i)=>{
-  if(g.finished){done++;if(g.finished.startsWith("Remis")||g.finished==="Patt")drawn++;
-   else if(g.finished==="Schachmatt"){const winner=-state(g).t;if(winner===g.humanColor)won++;else lost++;}
-  }
+  const outcome=sessionTools.result({...g,turn:state(g).t});
+  if(g.finished)done++;
+  if(outcome==="Remis")drawn++;
+  else if(outcome==="Sieg")won++;
+  else if(outcome==="Niederlage")lost++;
   const button=grid.children[i],label="Brett "+(i+1)+" · "+(g.finished||
    (g.awaitingSwitch?"Wechsel folgt":state(g).t===g.humanColor?"Du bist dran":"Bot denkt"))+" · Stärke "+g.strength;
   const className="simultan-card"+(i===active?" active":"")+(g.finished?" finished":"");
@@ -208,7 +210,7 @@ function draw(preserveMotion=false){
  drawCards();ensureSquares();
  const g=games[active];if(!g)return;
  const s=state(g),inCheck=checkStandard(s),kingSquare=inCheck?s.b.indexOf(s.t===1?"K":"k"):-1;
- const moves=s.t===g.humanColor&&!g.finished&&!g.awaitingSwitch?legalStandard(s):[];
+ const moves=s.t===g.humanColor&&!g.finished&&!g.awaitingSwitch&&!botsPaused?legalStandard(s):[];
  const targets=new Set(moves.filter(m=>m[0]===selected).map(m=>m[1]));
  const last=g.moves[g.moves.length-1];
  for(let j=0;j<64;j++){
@@ -267,6 +269,7 @@ if(promotionDialog){
  $("simultanPromotionCancel")?.addEventListener("click",hidePromotion);
 }
 board.addEventListener("pointerdown",event=>{
+ if(botsPaused)return;
  if(event.pointerType==="mouse"&&event.button!==0)return;
  const cell=event.target.closest(".simultan-square");
  const g=games[active];if(panel.hidden||panel.classList.contains("simultan-closing")||!cell||!g||g.finished||g.awaitingSwitch||state(g).t!==g.humanColor)return;
@@ -275,6 +278,7 @@ board.addEventListener("pointerdown",event=>{
  dragStart=i;dragPointer=event.pointerId;dragX=event.clientX;dragY=event.clientY;dragBoard=active;
 });
 board.addEventListener("pointerup",event=>{
+ if(botsPaused){dragStart=-1;dragPointer=null;dragBoard=-1;return;}
  if(dragPointer!==event.pointerId||dragStart<0)return;
  const from=dragStart,sourceBoard=dragBoard;dragStart=-1;dragPointer=null;dragBoard=-1;
  if(Math.hypot(event.clientX-dragX,event.clientY-dragY)<14)return;
@@ -288,9 +292,9 @@ board.addEventListener("pointerup",event=>{
  if(candidates.length)choosePromotion(g,candidates);
 });
 board.addEventListener("pointercancel",()=>{dragStart=-1;dragPointer=null;dragBoard=-1;});
-function choose(i){if(suppressTap)return;if(promotionPending)return;const g=games[active];if(!g||g.finished||g.awaitingSwitch||state(g).t!==g.humanColor)return;const s=state(g);if(side(s.b[i])===g.humanColor){selected=selected===i?-1:i;draw();return;}const candidates=legalStandard(s).filter(m=>m[0]===selected&&m[1]===i);if(!candidates.length){selected=-1;draw();return;}choosePromotion(g,candidates);}
+function choose(i){if(suppressTap)return;if(botsPaused)return;if(promotionPending)return;const g=games[active];if(!g||g.finished||g.awaitingSwitch||state(g).t!==g.humanColor)return;const s=state(g);if(side(s.b[i])===g.humanColor){selected=selected===i?-1:i;draw();return;}const candidates=legalStandard(s).filter(m=>m[0]===selected&&m[1]===i);if(!candidates.length){selected=-1;draw();return;}choosePromotion(g,candidates);}
 function shouldSwitchAfterMove(g,isBot){return Boolean(g.finished)||(g.humanColor===1&&isBot)||(g.humanColor===-1&&!isBot);}
-function commit(g,m){if(g.finished)return;const s=state(g),valid=legalStandard(s).find(x=>notation(x)===notation(m));if(!valid)return;const isBot=s.t!==g.humanColor;
+function commit(g,m){if(g.finished||botsPaused)return;const s=state(g),valid=legalStandard(s).find(x=>notation(x)===notation(m));if(!valid)return;const isBot=s.t!==g.humanColor;
  if(g.clock){
   if(sessionTools.freezeClock(g.clock,s.t,Date.now())){markFlag(g,s.t);draw();return;}
   g.clock.remaining[s.t===1?0:1]+=g.clock.increment;
@@ -392,9 +396,12 @@ importInput?.addEventListener("change",async()=>{
  try{importSessionText(await f.text());}catch(e){if(resumeNotice)resumeNotice.textContent="Import fehlgeschlagen: "+e.message;}
 });
 function pgnGame(g,index){
- const outcome=sessionTools.result({...g,turn:state(g).t});
  const message=g.finished==="Schachmatt"?"":g.finished;
- const game={variant:"standard",moves:g.moves,positions:g.history,timestamp:startedAt,message};
+ const game={variant:"standard",moves:g.moves,positions:g.history,timestamp:startedAt,message,
+  event:"SchachNova Simultanschach",round:String(index+1),
+  white:g.humanColor===1?"Spieler":"Computer",black:g.humanColor===-1?"Spieler":"Computer",
+  timeControl:g.clock?String(g.clock.initialSeconds)+"+"+String(g.clock.increment):null
+ };
  const file=window.SchachNovaNotation.generate(game,{legal:legalStandard,checked:checkStandard});
  return {...file,filename:"SchachNova-Simultan-Brett-"+(index+1)+".pgn"};
 }
