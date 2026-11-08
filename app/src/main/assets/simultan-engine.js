@@ -1,11 +1,19 @@
 /* SchachNova: one shared, bounded Stockfish worker for all simultaneous boards. */
 (function(){
 "use strict";
-let worker=null,ready=false,pending=null,queue=[],watchdog=null,disabled=false;
+let worker=null,ready=false,pending=null,queue=[],watchdog=null,idleTimer=null,disabled=false;
 const validMove=m=>typeof m==="string"&&/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(m);
 const clearWatch=()=>{if(watchdog!==null){clearTimeout(watchdog);watchdog=null;}};
+const clearIdle=()=>{if(idleTimer!==null){clearTimeout(idleTimer);idleTimer=null;}};
+function releaseIdle(){
+ clearIdle();
+ if(worker&&!pending&&!queue.length)idleTimer=setTimeout(()=>{
+  idleTimer=null;
+  if(!pending&&!queue.length&&worker){const unused=worker;worker=null;ready=false;try{unused.terminate();}catch(_){}}
+ },15000);
+}
 function stop(retry){
- clearWatch();
+ clearWatch();clearIdle();
  const old=worker;worker=null;ready=false;
  if(old){try{old.terminate();}catch(_){}}
  if(pending){pending.resolve(null);pending=null;}
@@ -15,7 +23,8 @@ function stop(retry){
 function fail(reason){console.warn("Simultan Stockfish: "+reason+" · lokaler Ersatzgegner");stop(false);}
 function watch(stage,ms=12000){clearWatch();watchdog=setTimeout(()=>fail(stage+" reagiert nicht"),ms);}
 function next(){
- if(!ready||pending||!queue.length||!worker)return;
+ if(!ready||pending||!queue.length||!worker){if(ready&&!pending&&!queue.length)releaseIdle();return;}
+ clearIdle();
  const request=queue.shift();pending=request;
  try{
   worker.postMessage("setoption name Skill Level value "+request.strength);
@@ -46,16 +55,24 @@ function boot(){
   current.postMessage("uci");watch("Initialisierung");
  }catch(e){fail("Startfehler: "+e.message);}
 }
-function request(moves,strength){
+function request(moves,strength,options={}){
  if(disabled||!Array.isArray(moves)||moves.length>500||!moves.every(validMove))return Promise.resolve(null);
  const level=Math.max(0,Math.min(20,Math.trunc(Number(strength)||0)));
+ const boardId=Number.isInteger(options.boardId)?options.boardId:-1;
  return new Promise(resolve=>{
-  queue.push({moves:moves.slice(),strength:level,resolve});
+  const job={moves:moves.slice(),strength:level,boardId,resolve};
+  if(options.priority)queue.unshift(job);else queue.push(job);
   boot();next();
  });
 }
+function prioritize(boardId){
+ const index=queue.findIndex(job=>job.boardId===boardId);
+ if(index<0)return false;
+ if(index>0){queue.unshift(...queue.splice(index,1));}
+ return true;
+}
 window.SchachNovaSimultanEngine=Object.freeze({
- request,
+ request,prioritize,
  reset(){stop(true);},
  get state(){return {available:!disabled,ready,queue:queue.length,thinking:!!pending};}
 });
