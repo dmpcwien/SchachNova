@@ -131,3 +131,9 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - Stockfish-UCI-Ausgaben werden auch bei mehreren Zeilen pro Nachricht vollständig verarbeitet.
 - Tests: `tests/coach-black-first.test.cjs` für automatischen ersten Weißzug und Notfallgegner; `tests/coach-colors-unlimited.test.cjs` für auswählbare Farben, Brett-/Uhrenzuordnung und unbegrenzte Zeit; aktualisierte Coach-Integration.
 - **Einschränkung:** Simulierte Browser-/Engine-Tests ersetzen keine reale Prüfung der Android-Oberfläche und Speicherbelastung auf einem Smartphone.
+
+## Coach-Anzeige ohne springendes Brett (1.0.17)
+- Die Live-Coach-Leiste belegt beim Spielen immer dieselbe Höhe. Kürzere und längere Texte verändern nicht mehr die Position des Schachbretts.
+- Lange Zugerklärungen werden im Vordergrund über dem Brett angezeigt, statt in einer kleinen Box zu scrollen, wie für den Coach-Modus gewünscht.
+- Die Schachregeln, Spielerfarben, Zeitkontrolle und gespeicherten Partien bleiben unverändert.
+- Neuer Regressionstest `tests/coach-overlay-layout.test.cjs` überprüft die feste Fläche und den Überlagerungsmodus. Das tatsächliche Verhalten auf Android sollte zusätzlich am Gerät geprüft werden.
