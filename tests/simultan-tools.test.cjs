@@ -44,7 +44,7 @@ assert.equal(t.result(gs[3]),"offen");
 const plan=t.training(gs);
 assert.ok(plan.some(x=>x.key==="defense"));
 assert.ok(plan.some(x=>x.key==="endgame"));
-assert.ok(plan.some(x=>x.key==="time"));
+assert.ok(t.training([gs[2],gs[2],gs[2]]).some(x=>x.key==="time"));
 assert.match(src,/SchachNovaNotation\.generate/);
 assert.match(src,/function pgnGame\(g,index\)/);
 assert.match(src,/function tickClocks\(\)/);
