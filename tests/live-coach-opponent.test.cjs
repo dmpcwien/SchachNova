@@ -77,7 +77,7 @@ vm.runInContext(bridge,ctx,{filename:"stockfish-bridge.js"});
 vm.runInContext(coach,ctx,{filename:"live-coach.js"});
 win.SchachNovaLiveCoach.enable(true);
 assert.equal(els.liveCoachPanel.hidden,false);
-assert.match(els.liveCoachMessage.textContent,/Computer spielt Schwarz/);
+assert.match(els.liveCoachMessage.textContent,/der Computer Schwarz/);
 win.schachNovaBotKickoff();
 assert.equal(ctx.movesPlayed.length,0,"Computer must not move when human has white to play");
 vm.runInContext("move([100,68,'',''])",ctx);
