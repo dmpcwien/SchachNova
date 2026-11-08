@@ -6,7 +6,7 @@ const coach=fs.readFileSync("app/src/main/assets/live-coach.js","utf8");
 const nav=fs.readFileSync("app/src/main/assets/game-mode-navigation.js","utf8");
 new vm.Script(bridge);new vm.Script(coach);
 assert.match(nav,/window\.schachNovaCoachMatch=mode==='coach'/);
-assert.match(nav,/window\.schachNovaBotColor=mode==='blind'/);
+assert.match(nav,/window\.schachNovaBotColor=\(mode==='coach'&&document\.getElementById\('coachPlayerColor'\)\.value==='black'\)/);
 assert.ok(nav.indexOf("window.schachNovaCoachMatch=mode==='coach'")<nav.indexOf("document.getElementById('newGame').click()"));
 const listeners={};
 function element(name,extra={}){
