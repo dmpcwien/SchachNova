@@ -27,7 +27,7 @@ async function main(){
  const window={};
  vm.runInNewContext(source,{window,Worker:TestWorker,console:{warn(){}},setTimeout,clearTimeout});
  const engine=window.SchachNovaSimultanEngine;
- const requests=Array.from({length:20},(_,i)=>engine.request(["e2e4"],i,{boardId:i}));
+ const requests=Array.from({length:20},(_,i)=>engine.request([i===19?"d2d4":"e2e4"],i,{boardId:i}));
  await new Promise(resolve=>setImmediate(resolve));
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(engine.state.thinking,true);
@@ -40,7 +40,7 @@ async function main(){
  assert.equal(maxConcurrent,1,"Only one engine search may be active");
  assert.equal(positions.length,20);
  assert.equal(positions[0],"position startpos moves e2e4");
- assert.ok(positions[1].includes("e2e4"));
+ assert.equal(positions[1],"position startpos moves d2d4","Selected board must jump ahead in the queued searches");
  // Priority is verified by giving each queued board a distinct move list.
  engine.reset();
  positions.length=0;
