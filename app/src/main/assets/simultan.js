@@ -8,7 +8,7 @@ const storageKey="schachnova.simultan.v1";
 const summary=$("simultanSummary"),resumeNotice=$("simultanResumeNotice"),autoToggle=$("simultanAutoSwitch"),claimButton=$("simultanClaimDraw"),promotionDialog=$("simultanPromotionDialog");
 function cancelSwitch(){viewGeneration++;if(switchTimer!==null){clearTimeout(switchTimer);switchTimer=null;}}
 function nextPlayable(i,direction=1){if(!games.length)return -1;for(let step=0;step<games.length;step++){const n=(i+step*direction+games.length*2)%games.length;if(!games[n].finished)return n;}return -1;}
-function showBoard(i,includeFinished=false){dragStart=-1;dragPointer=null;dragBoard=-1;if(!games.length)return;const next=includeFinished?(i+games.length)%games.length:nextPlayable((i+games.length)%games.length,1);if(next<0){draw();return;}const previous=games[active];cancelSwitch();if(previous)previous.awaitingSwitch=false;stopMotion();active=next;games[active].awaitingSwitch=false;selected=-1;hidePromotion();saveSession();draw();}
+function showBoard(i,includeFinished=false){dragStart=-1;dragPointer=null;dragBoard=-1;if(!games.length)return;const next=includeFinished?(i+games.length)%games.length:nextPlayable((i+games.length)%games.length,1);if(next<0){draw();return;}const previous=games[active];cancelSwitch();if(previous)previous.awaitingSwitch=false;stopMotion();active=next;window.SchachNovaSimultanEngine?.prioritize(active);games[active].awaitingSwitch=false;selected=-1;hidePromotion();saveSession();draw();}
 function autoNext(g,delay=2000){if(!autoSwitch){g.awaitingSwitch=false;draw();return;}if(panel.hidden||games[active]!==g){g.awaitingSwitch=false;saveSession();return;}const generation=viewGeneration;switchTimer=setTimeout(()=>{switchTimer=null;if(generation!==viewGeneration||panel.hidden||games[active]!==g)return;g.awaitingSwitch=false;const next=nextPlayable((active+1)%games.length);if(next>=0&&next!==active)showBoard(next);else draw();},delay);}
 /* Shared sprite animation; no fixed piece set or duplicated overlay code. */
 function stopMotion(){window.SchachNovaMoveAnimator?.cancel(board);}
@@ -56,6 +56,20 @@ function loadSession(){
  }catch(e){console.warn("Gespeicherte Simultanpartie ungültig",e);if(resumeNotice)resumeNotice.textContent="Die letzte Simultanpartie konnte nicht sicher wiederhergestellt werden.";return false;}
 }
 function hidePromotion(){promotionPending=null;if(promotionDialog)promotionDialog.hidden=true;}
+/* The snapshot already contains every committed move: CPU work can be safely paused. */
+function pauseBots(){
+ if(!games.length)return;
+ cancelSwitch();stopMotion();epoch++;
+ window.SchachNovaSimultanEngine?.reset();
+ for(const timer of timers)clearTimeout(timer);
+ timers.clear();
+ for(const g of games){g.thinking=false;g.awaitingSwitch=false;}
+ saveSession();
+}
+function resumeBots(){
+ if(panel.hidden||document.hidden)return;
+ for(const g of games)if(!g.finished&&state(g).t!==g.humanColor)botMove(g);
+}
 
 function vibrateMove(pattern){
  const setting=document.getElementById("vibrationToggle");
@@ -199,9 +213,9 @@ board.addEventListener("pointerup",event=>{
 board.addEventListener("pointercancel",()=>{dragStart=-1;dragPointer=null;dragBoard=-1;});
 function choose(i){if(suppressTap)return;if(promotionPending)return;const g=games[active];if(!g||g.finished||g.awaitingSwitch||state(g).t!==g.humanColor)return;const s=state(g);if(side(s.b[i])===g.humanColor){selected=selected===i?-1:i;draw();return;}const candidates=legalStandard(s).filter(m=>m[0]===selected&&m[1]===i);if(!candidates.length){selected=-1;draw();return;}choosePromotion(g,candidates);}
 function shouldSwitchAfterMove(g,isBot){return Boolean(g.finished)||(g.humanColor===1&&isBot)||(g.humanColor===-1&&!isBot);}
-function commit(g,m){if(g.finished)return;const s=state(g),valid=legalStandard(s).find(x=>notation(x)===notation(m));if(!valid)return;const isBot=s.t!==g.humanColor;if(games[active]===g&&!g.awaitingSwitch)cancelSwitch();const animation=games[active]===g?captureMove(g,valid,s):null;const nextState=applyStandard(s,valid);g.history.push(nextState);g.moves.push(valid);feedbackForMove(s,nextState,valid);g.finished=status(g);selected=-1;saveSession();if(games[active]===g){draw(true);window.SchachNovaMoveAnimator?.play(animation);}else{drawCards();}if(g.finished&&games[active]===g&&nextPlayable((active+1)%games.length)<0){info.textContent="Alle Bretter beendet · "+g.finished;}if(games[active]===g){const shouldSwitch=shouldSwitchAfterMove(g,isBot);if(shouldSwitch&&autoSwitch){g.awaitingSwitch=true;drawCards();autoNext(g,isBot?2000:450);}}if(!g.finished&&state(g).t!==g.humanColor)botMove(g);}
+function commit(g,m){if(g.finished)return;const s=state(g),valid=legalStandard(s).find(x=>notation(x)===notation(m));if(!valid)return;const isBot=s.t!==g.humanColor;if(games[active]===g&&!g.awaitingSwitch)cancelSwitch();const animation=games[active]===g?captureMove(g,valid,s):null;const nextState=applyStandard(s,valid);g.history.push(nextState);g.moves.push(valid);if(games[active]===g&&!panel.hidden&&!document.hidden)feedbackForMove(s,nextState,valid);g.finished=status(g);selected=-1;saveSession();if(games[active]===g){draw(true);window.SchachNovaMoveAnimator?.play(animation);}else{drawCards();}if(g.finished&&games[active]===g&&nextPlayable((active+1)%games.length)<0){info.textContent="Alle Bretter beendet · "+g.finished;}if(games[active]===g){const shouldSwitch=shouldSwitchAfterMove(g,isBot);if(shouldSwitch&&autoSwitch){g.awaitingSwitch=true;drawCards();autoNext(g,isBot?2000:450);}}if(!g.finished&&state(g).t!==g.humanColor)botMove(g);}
 function botMove(g){
- if(g.thinking||g.finished)return;
+ if(g.thinking||g.finished||panel.hidden||document.hidden)return;
  g.thinking=true;
  const stamp=epoch,expected=state(g),delay=1100+g.strength*115;
  const fallback=()=>{
@@ -212,7 +226,7 @@ function botMove(g){
  const engine=window.SchachNovaSimultanEngine;
  if(!engine){fallback();return;}
  const started=Date.now();
- engine.request(g.moves.map(notation),g.strength).then(uci=>{
+ engine.request(g.moves.map(notation),g.strength,{boardId:games.indexOf(g),priority:games[active]===g}).then(uci=>{
   if(stamp!==epoch||state(g)!==expected||g.finished){g.thinking=false;return;}
   const move=uci?legalStandard(expected).find(m=>notation(m)===uci):null;
   if(!move){fallback();return;}
@@ -225,12 +239,14 @@ function botMove(g){
  }).catch(()=>fallback());
 }
 function start(){if(games.length&&games.some(g=>!g.finished)&&!window.confirm("Laufende Simultanpartie ersetzen? Der bisherige Spielstand geht verloren."))return;cancelSwitch();stopMotion();hidePromotion();epoch++;window.SchachNovaSimultanEngine?.reset();for(const t of timers)clearTimeout(t);timers.clear();games=Array.from({length:Math.min(20,Math.max(5,Number(count.value)||5))},fresh);active=0;selected=-1;panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");saveSession();draw();for(const g of games)if(g.humanColor===-1)botMove(g);}
-$("simultanOpen").addEventListener("click",()=>{panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");if(!games.length)start();else{draw();for(const g of games)if(!g.finished&&state(g).t!==g.humanColor)botMove(g);}});
+$("simultanOpen").addEventListener("click",()=>{panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");if(!games.length)start();else{draw();resumeBots();}});
 $("simultanStart").addEventListener("click",start);strength.addEventListener("change",()=>{if(games[active]){games[active].strength=Number(strength.value);saveSession();draw();}});
-$("simultanClose").addEventListener("click",()=>{cancelSwitch();hidePromotion();if(games[active])games[active].awaitingSwitch=false;saveSession();panel.classList.remove("simultan-opening");panel.classList.add("simultan-closing");setTimeout(()=>{if(panel.classList.contains("simultan-closing")){panel.hidden=true;panel.classList.remove("simultan-closing");}},220);});
+$("simultanClose").addEventListener("click",()=>{cancelSwitch();hidePromotion();if(games[active])games[active].awaitingSwitch=false;pauseBots();saveSession();panel.classList.remove("simultan-opening");panel.classList.add("simultan-closing");setTimeout(()=>{if(panel.classList.contains("simultan-closing")){panel.hidden=true;panel.classList.remove("simultan-closing");}},220);});
 $("simultanPrev").addEventListener("click",()=>{const n=nextPlayable((active-1+games.length)%games.length,-1);if(n>=0)showBoard(n);});
 $("simultanNext").addEventListener("click",()=>{const n=nextPlayable((active+1)%games.length);if(n>=0)showBoard(n);});
 if(autoToggle)autoToggle.addEventListener("change",()=>{autoSwitch=autoToggle.checked;if(!autoSwitch){cancelSwitch();if(games[active])games[active].awaitingSwitch=false;draw();}saveSession();});
 if(claimButton)claimButton.addEventListener("click",()=>{const g=games[active];if(!g||g.finished||state(g).t!==g.humanColor)return;const reason=drawClaimReason(g);if(!reason)return;g.finished="Remis ("+reason+")";cancelSwitch();saveSession();draw();const next=nextPlayable((active+1)%games.length);if(autoSwitch&&next>=0)autoNext(g,1200);});
 loadSession();
+document.addEventListener("visibilitychange",()=>{if(document.hidden)pauseBots();else resumeBots();});
+window.addEventListener("pagehide",pauseBots);
 })();
