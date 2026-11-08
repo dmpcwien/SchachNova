@@ -161,7 +161,7 @@ function maybePlay(){
  if(!ready){startEngine();return;}
  if(busy)return;
  busy=true;pending="bot";botStartedAt=Date.now();botPosition=movesPlayed.map(notation).join(" ");
- try{worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");watchStandard("Zugberechnung");}
+ try{worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");watchStandard("Zugberechnung");setInfo(window.schachNovaCoachMatch?"Coach-Gegner überlegt · Stockfish offline":"Computer überlegt · Stockfish offline");}
  catch(e){standardFailure("Zugberechnung: "+e.message);}
 }
 bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="bot"){clearFairyWatchdog();cancelBotDelay();if(fallbackTimer!==null){clearTimeout(fallbackTimer);fallbackTimer=null;}if(fairy)fairy.stop();if(worker&&busy)resetStandardEngine();botPosition=null;}if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
