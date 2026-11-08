@@ -295,7 +295,7 @@ function commit(g,m){if(g.finished)return;const s=state(g),valid=legalStandard(s
   if(sessionTools.freezeClock(g.clock,s.t,Date.now())){markFlag(g,s.t);draw();return;}
   g.clock.remaining[s.t===1?0:1]+=g.clock.increment;
  }
- if(games[active]===g&&!g.awaitingSwitch)cancelSwitch();const animation=games[active]===g?captureMove(g,valid,s):null;const nextState=applyStandard(s,valid);g.history.push(nextState);g.moves.push(valid);if(games[active]===g&&!panel.hidden&&!document.hidden)feedbackForMove(s,nextState,valid);g.finished=status(g);if(!g.finished)sessionTools.startClock(g.clock,Date.now());selected=-1;saveSession();if(games[active]===g){draw(true);window.SchachNovaMoveAnimator?.play(animation);}else{drawCards();}if(g.finished&&games[active]===g&&nextPlayable((active+1)%games.length)<0){info.textContent="Alle Bretter beendet · "+g.finished;}if(games[active]===g){const shouldSwitch=shouldSwitchAfterMove(g,isBot);if(shouldSwitch&&autoSwitch){g.awaitingSwitch=true;drawCards();autoNext(g,isBot?2000:450);}}if(!g.finished&&state(g).t!==g.humanColor)botMove(g);}
+ if(games[active]===g&&!g.awaitingSwitch)cancelSwitch();const animation=games[active]===g?captureMove(g,valid,s):null;const nextState=applyStandard(s,valid);g.history.push(nextState);g.moves.push(valid);if(games[active]===g&&!panel.hidden&&!document.hidden)feedbackForMove(s,nextState,valid);g.finished=status(g);if(!g.finished&&!botsPaused&&!panel.hidden&&!document.hidden)sessionTools.startClock(g.clock,Date.now());selected=-1;saveSession();if(games[active]===g){draw(true);window.SchachNovaMoveAnimator?.play(animation);}else{drawCards();}if(g.finished&&games[active]===g&&nextPlayable((active+1)%games.length)<0){info.textContent="Alle Bretter beendet · "+g.finished;}if(games[active]===g){const shouldSwitch=shouldSwitchAfterMove(g,isBot);if(shouldSwitch&&autoSwitch){g.awaitingSwitch=true;drawCards();autoNext(g,isBot?2000:450);}}if(!g.finished&&state(g).t!==g.humanColor)botMove(g);}
 function botMove(g){
  if(g.thinking||g.finished||panel.hidden||document.hidden||botsPaused)return;
  g.thinking=true;
@@ -320,7 +320,7 @@ function botMove(g){
   timers.add(timer);
  }).catch(()=>fallback());
 }
-function start(){if(games.length&&games.some(g=>!g.finished)&&!window.confirm("Laufende Simultanpartie ersetzen? Der bisherige Spielstand geht verloren."))return;cancelSwitch();stopMotion();hidePromotion();epoch++;window.SchachNovaSimultanEngine?.reset();for(const t of timers)clearTimeout(t);timers.clear();fixedStrength=Number(strength.value)||8;strengthMode=strengthModeSelect?.value==="same"?"same":"random";defaultClockMinutes=Number(clockMinutes?.value)||0;defaultIncrement=Number(clockIncrement?.value)||0;startedAt=Date.now();games=Array.from({length:Math.min(20,Math.max(5,Number(count.value)||5))},fresh);botsPaused=false;updatePauseControl();active=0;selected=-1;panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");saveSession();draw();resumeClocks();for(const g of games)if(g.humanColor===-1)botMove(g);}
+function start(){if(games.length&&games.some(g=>!g.finished)&&!window.confirm("Laufende Simultanpartie ersetzen? Der bisherige Spielstand geht verloren."))return;cancelSwitch();stopMotion();hidePromotion();epoch++;window.SchachNovaSimultanEngine?.reset();for(const t of timers)clearTimeout(t);timers.clear();fixedStrength=Math.max(0,Math.min(20,Number(strength.value)||0));strengthMode=strengthModeSelect?.value==="same"?"same":"random";defaultClockMinutes=Number(clockMinutes?.value)||0;defaultIncrement=Number(clockIncrement?.value)||0;startedAt=Date.now();games=Array.from({length:Math.min(20,Math.max(5,Number(count.value)||5))},fresh);botsPaused=false;updatePauseControl();active=0;selected=-1;panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");saveSession();draw();resumeClocks();for(const g of games)if(g.humanColor===-1)botMove(g);}
 $("simultanOpen").addEventListener("click",()=>{panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");if(!games.length)start();else{draw();resumeBots();}});
 $("simultanStart").addEventListener("click",start);strength.addEventListener("change",()=>{if(games[active]){games[active].strength=Number(strength.value);saveSession();draw();}});
 $("simultanClose").addEventListener("click",()=>{cancelSwitch();hidePromotion();if(games[active])games[active].awaitingSwitch=false;pauseBots();saveSession();panel.classList.remove("simultan-opening");panel.classList.add("simultan-closing");setTimeout(()=>{if(panel.classList.contains("simultan-closing")){panel.hidden=true;panel.classList.remove("simultan-closing");}},220);});
@@ -329,7 +329,7 @@ $("simultanNext").addEventListener("click",()=>{const n=nextPlayable((active+1)%
 if(autoToggle)autoToggle.addEventListener("change",()=>{autoSwitch=autoToggle.checked;if(!autoSwitch){cancelSwitch();if(games[active])games[active].awaitingSwitch=false;draw();}saveSession();});
 if(strengthModeSelect)strengthModeSelect.addEventListener("change",()=>{
  strengthMode=strengthModeSelect.value==="same"?"same":"random";
- fixedStrength=Number(strength.value)||8;
+ fixedStrength=Math.max(0,Math.min(20,Number(strength.value)||0));
  saveSession();
 });
 if(clockApply)clockApply.addEventListener("click",()=>{
