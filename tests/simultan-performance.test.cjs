@@ -29,7 +29,7 @@ const games=Array.from({length:20},(_,i)=>({
  humanColor:i%2?1:-1,strength:i,finished:"",awaitingSwitch:false,thinking:false,
  history:[{t:1}]
 }));
-const view={grid,board,summary,games,active:0,document:{createElement:()=>element()},
+const view={grid,board,summary,games,active:0,sessionTools:require("../app/src/main/assets/simultan-tools.js"),document:{createElement:()=>element()},
  state:g=>g.history[g.history.length-1]
 };
 vm.createContext(view);
@@ -46,6 +46,16 @@ vm.runInContext("drawCards();",view);
 assert.strictEqual(grid.children[0],firstCard);
 assert.match(grid.children[0].className,/finished/);
 assert.match(summary.textContent,/Remis 1/);
+games[1].finished="Zeitüberschreitung (Schwarz gewinnt)";
+games[2].finished="Zeitüberschreitung (Schwarz gewinnt)";
+games[3].finished="Schachmatt";
+games[4].finished="Schachmatt";
+vm.runInContext("drawCards();",view);
+assert.match(summary.textContent,/Abgeschlossen 5\/20/);
+assert.match(summary.textContent,/Siege 2/);
+assert.match(summary.textContent,/Niederlagen 2/);
+assert.match(summary.textContent,/Remis 1/);
+assert.strictEqual(grid.children[0],firstCard,"Completed game cards must keep stable nodes");
 const paused={
  games,epoch:0,timers:new Set([123]),autoSwitch:true,botsPaused:false,
  panel:{hidden:false},document:{hidden:true},
