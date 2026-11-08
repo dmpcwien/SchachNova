@@ -112,3 +112,12 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - Pausierte Bretter zeigen ihren Zustand bereits in der Brettübersicht.
 - Zusätzliche Regressionstests: `tests/simultan-expiry.test.cjs` und `tests/simultan-engine-cancel.test.cjs`. Die bestehenden Tests zu 20 Brettern, Datenwiederherstellung, Ergebnissen und Uhr bleiben erhalten.
 - Die Tests prüfen Codepfade und simulierte Engine-Antworten. Reale Akkulaufzeit, Bildrate und Zuverlässigkeit unter mehrstündiger Last auf Android sind nicht gemessen.
+
+## Coach-Gegner spielt wieder (1.0.15)
+- In der Spielart **„Mit Coach gegen Computer“** spielt der Mensch Weiß, der Stockfish-Computergegner Schwarz. Der Live-Coach kommentiert parallel die Entscheidungen des Menschen; er ist nicht nur eine Anzeige ohne Gegnerzüge.
+- Der Spielmodus setzt die Computerfarbe und den Coach-Modus **vor** dem Start/Reset einer Partie. Nach jedem eigenen Zug wird der Computergegner zusätzlich explizit zum Antworten angestoßen.
+- Die UCI-Kommunikation für Computergegner **und** Live-Coach verarbeitet auch mehrzeilige Engine-Nachrichten mit Zeilenumbrüchen zuverlässig. Das behebt Start- und Bereitschaftsprobleme bei gebündelten Engine-Antworten.
+- Während des Engine-Zugs zeigt die Oberfläche „Coach-Gegner überlegt · Stockfish offline“ an. Die Startauswahl beschreibt den Computergegner eindeutig.
+- Schutz vor mehrfachen Suchaufträgen, solange der bereits berechnete Computerzug auf seine Anzeige wartet.
+- Neuer Integrationstest `tests/live-coach-opponent.test.cjs`: simuliert eine echte Partie mit beiden Engine-Workern, prüft nach dem eigenen Zug den automatisch ausgeführten legalen Gegenzug und die separate Spielerzug-Analyse.
+- Tests sind simulierte Offline-Engine-Abläufe. Die Android-Bedienung und realer Engine-Start auf einem Mobilgerät müssen zusätzlich geprüft werden.
