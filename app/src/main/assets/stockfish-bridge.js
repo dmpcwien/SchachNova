@@ -53,7 +53,9 @@ function startEngine(){
    worker=engine;
    engine.onmessage=e=>{
      if(worker!==engine)return;
-     const line=String(e.data);
+     for(const raw of String(e.data??"").split(/\r?\n/)){
+      const line=raw.trim();
+      if(!line)continue;
      if(line==="uciok")engine.postMessage("isready");
      if(line==="readyok"){clearStandardWatchdog();ready=true;setInfo("Stockfish 19 bereit · offline");maybePlay();}
      if(line.startsWith("info depth")&&line.includes(" score ")){const m=line.match(/score (cp|mate) (-?\d+)/);if(m){lastScore=m[1]==="cp"?(Number(m[2])/100).toFixed(2):"Matt in "+m[2];if(pending==="analysis")setInfo("Analyse · "+lastScore);}}
@@ -68,6 +70,7 @@ function startEngine(){
        if(match)deliverBotMove(match,current(),expected,botStartedAt);
        else standardFailure("unzulässiger Engine-Zug "+u);
       }else if(action==="analysis")setInfo("Stockfish empfiehlt: "+u+(lastScore!==null?" · Bewertung "+lastScore:""));
+     }
      }
    };
    engine.onerror=()=>{if(worker===engine)standardFailure("Worker-Fehler");};
@@ -137,7 +140,7 @@ function playVariantFallback(localMode=false){
  },350);
 }
 function maybePlay(){
- if(mode!=="bot"||current().t!==botSide()||ended||viewIndex!==history.length-1)return;
+ if(mode!=="bot"||current().t!==botSide()||ended||viewIndex!==history.length-1||botDelayTimer!==null)return;
  if(variantMode!=="standard"){
   if(variantMode==="torpedo"){playTorpedoBot();return;}
   if(window.SchachNovaVariants?.[variantMode]?.bot===false){setInfo("Für diese Variante ist nur das lokale Spiel zu zweit freigegeben");return;}
@@ -166,7 +169,17 @@ try{const saved=localStorage.getItem("schachnova.botStrength");if(saved!==null&&
 level.addEventListener("change",()=>{strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;try{localStorage.setItem("schachnova.botStrength",level.value);}catch(e){}setInfo("Bot-Stärke eingestellt: "+level.selectedOptions[0].textContent);if(worker&&ready&&!busy)worker.postMessage("setoption name Skill Level value "+strength);});
 homeLevel?.addEventListener("change",()=>{level.value=homeLevel.value;level.dispatchEvent(new Event("change"));});
 analysis.addEventListener("click",()=>{if(variantMode!=="standard"){setInfo("Stockfish-Analyse für diese Variante noch nicht freigegeben");return;}startEngine();if(!ready||busy){setInfo("Engine lädt oder ist beschäftigt");return;}busy=true;pending="analysis";sendPosition();worker.postMessage("go movetime 1100");watchStandard("Analyse");setInfo("Stockfish analysiert …");});
-window.schachNovaBotKickoff=()=>{mode=bot.value;if(mode==="bot"){if(variantMode==="standard")startEngine();maybePlay();}};
+window.schachNovaBotKickoff=()=>{
+ if(window.schachNovaCoachMatch===true&&bot.value!=="bot"){
+  bot.value="bot";
+  bot.dispatchEvent(new Event("change"));
+ }
+ mode=bot.value;
+ if(mode==="bot"){
+  if(variantMode==="standard")startEngine();
+  maybePlay();
+ }
+};
 // The dedicated live-coach.js owns the Coach button and its separate analysis worker.
 // Do not attach a second Coach handler or run duplicate analyses here.
 const baseMove=move;move=function(m){const count=movesPlayed.length;baseMove(m);if(movesPlayed.length!==count)maybePlay();};
