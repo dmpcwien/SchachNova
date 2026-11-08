@@ -47,7 +47,7 @@ assert.strictEqual(grid.children[0],firstCard);
 assert.match(grid.children[0].className,/finished/);
 assert.match(summary.textContent,/Remis 1/);
 const paused={
- games,epoch:0,timers:new Set([123]),autoSwitch:true,
+ games,epoch:0,timers:new Set([123]),autoSwitch:true,botsPaused:false,
  panel:{hidden:false},document:{hidden:true},
  window:{SchachNovaSimultanEngine:{reset(){paused.resets++;}}},
  resets:0,cancelSwitch(){paused.switchCancels++;},switchCancels:0,
@@ -69,6 +69,9 @@ assert.equal(paused.started,9,"Resume only bot-turn boards that are not finished
 paused.panel.hidden=true;
 vm.runInContext("resumeBots();",paused);
 assert.equal(paused.started,9,"Hidden simultan screen must not calculate moves");
+paused.panel.hidden=false;paused.botsPaused=true;
+vm.runInContext("resumeBots();",paused);
+assert.equal(paused.started,9,"Manually paused bots must remain idle while visible");
 assert.match(src,/games\[active\]===g&&!panel\.hidden&&!document\.hidden\)feedbackForMove/);
 assert.match(src,/prioritize\(active\)/);
 assert.match(src,/function pauseBots\(\)/);
