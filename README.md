@@ -95,3 +95,11 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - Kompakte, einklappbare Einstellungen und horizontal scrollbar angeordnete Tools für kleine Android-Bildschirme.
 - Opt-in 10-Sekunden-Leistungsdiagnose für Bildraten-Callbacks und, soweit unterstützt, Android-Prozess-CPU-Zeit, Batteriestand und aktuellen Batteriestrom. **Keine verifizierte Akkulaufzeitmessung**; tatsächliche Vergleiche erfordern gleiche Bedingungen auf einem realen Gerät.
 - Zusätzliche Tests in tests/simultan-session.test.cjs, tests/simultan-tools.test.cjs und bestehenden 20-Bretter-/Lifecycle-Tests.
+
+## Simultan-Korrekturen und PGN-Metadaten (1.0.13)
+- Ergebniskacheln zählen jetzt **alle** anerkannten Gewinnarten, insbesondere Siege und Niederlagen durch Zeitüberschreitung; die Bilanz stimmt mit der Sitzungsanalyse überein.
+- Im manuell pausierten Simultan-Modus lassen sich keine Züge per Tippen, Ziehen oder durch noch offene Umwandlungsdialoge ausführen. So können Schachuhren und Inkremente während der Pause nicht unbeabsichtigt verändert werden.
+- PGN-Dateien enthalten für Simultan-Partien die Brettnummer (Round), menschliche/Computer-Spielerfarben, ein vorhandenes Zeitkontroll-Tag und bei Zeitablauf den Beendigungsgrund. Klassische Einzelpartien behalten ihre bisherigen Standardfelder.
+- PGN-Tag-Inhalte werden weiterhin maskiert und geprüft, um fehlerhafte Metadaten zu vermeiden.
+- Neue Tests überprüfen Ergebnisse bei Matt und Zeitablauf, PGN-Metadaten sowie die Pausensperre zur Laufzeit.
+- **Prüfgrenze:** GitHub Actions kontrolliert Syntax, Regressionen, Android-Build und Signatur. Bedienung und Akkulaufzeit bleiben auf einem echten Gerät zu prüfen.
