@@ -19,7 +19,7 @@ Siehe [Backup-Regeln](docs/BACKUP_POLICY.md).
 ## Sicherheit
 Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen Repository speichern.
 
-**Status:** Projektregeln vorhanden; noch keine spielbare Android-APK.
+**Status:** Android-App mit automatisierten Debug- und Release-Builds. Erfolgreiche GitHub Actions ersetzen keine Android-Geräteprüfung.
 
 
 ## Updates aus Verbesserungs-ZIP (2026-11-02)
@@ -83,3 +83,15 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - Energieprofil und manuelle Pause werden in der bestehenden Simultan-Sitzung gespeichert; ältere gespeicherte Sitzungen laden kompatibel mit Standardeinstellung „Ausgewogen“.
 - UI-Tasten mit mindestens 44 px Höhe, Regressionstests für Rechenzeitprofile und Pausenstatus.
 - **Keine Behauptung einer bestimmten Akkueinsparung:** Das geringere Suchbudget ist im Code nachgewiesen, Akkumessungen müssen mit einer installierten APK auf einem echten Android-Gerät erfolgen.
+
+## Simultan-Sicherungen, Schachuhren und Diagnose (1.0.12)
+
+- Versioniertes JSON-Format; alte lokale v1-Sicherungen werden gelesen. Import prüft Zugfolge, 5–20 Bretter, 500 Halbzüge pro Brett, Dateigröße, Ergebnisse und Schachuhren, bevor Daten ersetzt werden.
+- Native Android-Systemdateiauswahl für JSON-Sicherungsimport und Export, Wiederherstellung der vorherigen lokalen Sicherung.
+- PGN-Export pro Brett und gesammelt für alle Bretter.
+- Gegnerstärke zufällig pro Brett oder auf allen gleich; individuelle Stärke pro Brett bleibt einstellbar (0–20).
+- Individuelle optionale Schachuhren mit Inkrement. Einstellungen vor dem ersten Zug, getrennte Zeiten für Weiß/Schwarz, Einfrieren im Hintergrund und bei Pause. Zeitüberschreitung beendet das Brett. Mehrere Bretter können gleichzeitig laufen.
+- Auswertungsansicht: Ergebnisse, Gegnerstärke, Halbzüge, Trainingsvorschläge aus beobachtbaren Spielverläufen. **Keine vollständige Stockfish-Fehleranalyse**; taktische Muster sind Hinweise und keine bewiesenen Patzer.
+- Kompakte, einklappbare Einstellungen und horizontal scrollbar angeordnete Tools für kleine Android-Bildschirme.
+- Opt-in 10-Sekunden-Leistungsdiagnose für Bildraten-Callbacks und, soweit unterstützt, Android-Prozess-CPU-Zeit, Batteriestand und aktuellen Batteriestrom. **Keine verifizierte Akkulaufzeitmessung**; tatsächliche Vergleiche erfordern gleiche Bedingungen auf einem realen Gerät.
+- Zusätzliche Tests in tests/simultan-session.test.cjs, tests/simultan-tools.test.cjs und bestehenden 20-Bretter-/Lifecycle-Tests.
