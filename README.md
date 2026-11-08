@@ -121,3 +121,13 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - Schutz vor mehrfachen Suchaufträgen, solange der bereits berechnete Computerzug auf seine Anzeige wartet.
 - Neuer Integrationstest `tests/live-coach-opponent.test.cjs`: simuliert eine echte Partie mit beiden Engine-Workern, prüft nach dem eigenen Zug den automatisch ausgeführten legalen Gegenzug und die separate Spielerzug-Analyse.
 - Tests sind simulierte Offline-Engine-Abläufe. Die Android-Bedienung und realer Engine-Start auf einem Mobilgerät müssen zusätzlich geprüft werden.
+
+## Coach: Farbwahl, ohne Zeit, automatische Züge (1.0.16)
+- Der Coach-Modus bietet jetzt einen eigenen Farbwähler: Weiß (Spieler beginnt) oder Schwarz (Computer beginnt mit Weiß). Die Auswahl wird bei jedem Spielstart vor der Engine-Aktivierung übernommen.
+- Die Anzeige richtet das Brett auf die eigene Farbe aus. Spielername, Figurenfarben und Schachuhr werden oben/unten passend zur aktuellen Brettausrichtung dargestellt – auch nach manuellem Drehen.
+- Für Coach-Partien gilt beim Öffnen der Einstellungen standardmäßig „Ohne Zeit“; andere Zeitkontrollen lassen sich weiterhin manuell wählen. Bei unbegrenzter Zeit erscheint statt einer ablaufenden Uhr ein **∞**, und keine Partie endet wegen Zeitablauf.
+- Der Live-Coach bewertet den menschlichen Zug erst nach dem Computerzug, damit zwei Stockfish-Worker nicht gleichzeitig die Android-Rechenleistung belasten. Der Coach kann so weiterhin Tipps nach einem Zug geben.
+- Sollte der Computerzug trotz laufender Partie ausbleiben, wird nach begrenzter Wartezeit der regelkonforme lokale Ersatzgegner aktiviert. Normale Schachpartien ohne Coach behalten ihr bisheriges Zeit- und Engineverhalten.
+- Stockfish-UCI-Ausgaben werden auch bei mehreren Zeilen pro Nachricht vollständig verarbeitet.
+- Tests: `tests/coach-black-first.test.cjs` für automatischen ersten Weißzug und Notfallgegner; `tests/coach-colors-unlimited.test.cjs` für auswählbare Farben, Brett-/Uhrenzuordnung und unbegrenzte Zeit; aktualisierte Coach-Integration.
+- **Einschränkung:** Simulierte Browser-/Engine-Tests ersetzen keine reale Prüfung der Android-Oberfläche und Speicherbelastung auf einem Smartphone.
