@@ -81,6 +81,6 @@ const assert=require("node:assert/strict");
  assert.equal(instances.length,2,"New game must retry the primary Stockfish engine");
 }
 const coach=fs.readFileSync("app/src/main/assets/live-coach.js","utf8");
-assert.match(coach,/before\.t===botColor\)return;/,"Live Coach must never critique bot moves instead of the human move");
+assert.match(coach,/if\(botMatch&&before\.t===botColor\)\{/,"Live Coach must not critique bot moves, but resume pending human advice after reply");
 assert.match(coach,/const baseMove=move;/,"Live Coach remains the sole analysis controller");
 console.log("Fairy and classical Stockfish errors recover; live Coach only critiques human moves");
