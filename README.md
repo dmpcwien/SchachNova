@@ -55,3 +55,12 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - Brett drehen, Koordinaten bei Bedarf einblenden, Treffer-/Fehlerzählung.
 - Persönlicher 60-Sekunden-Bestwert wird lokal gespeichert, nur abgeschlossene Versuche zählen.
 - Keine zusätzlichen Menüreiter: erreichbar über Training, Android-Zurück führt zum Training.
+
+## Simultan-Verlässlichkeit (1.0.9)
+- Simultan-Sitzung mit 5–20 Brettern lokal sichern und nach Neustart aus legalen Zügen wiederaufbauen.
+- Fertige Bretter bleiben anklickbar; Bilanz aus Siegen, Niederlagen und Remis wird gezeigt.
+- Brettwechsel optional deaktivierbar; Auswahl der Umwandlungsfigur über Tasten statt Texteingabe.
+- Drei- und fünffache Stellungswiederholung, 50-/75-Züge-Regel sowie Materialremis im Simultan-Modus berücksichtigt.
+- Ein gemeinsamer Stockfish-19-Worker bearbeitet Computerzüge aller Bretter nacheinander. Bei Engine-Ausfall schaltet der Simultan-Modus auf den ausgewiesenen lokalen Ersatzgegner um.
+- Neue Regressionstests für Sitzungs-Wiederherstellung, beschädigte Speicherdaten und Engine-Warteschlange.
+- **Wichtig:** Für die Nutzung der Stockfish-Engine muss die APK aus dem vollständigen GitHub-Actions-Build stammen, der die Engine-Dateien einbindet. Ein bestandener Quellcode-Test allein bestätigt nicht die Engine-Ausführung auf jedem Android-Gerät.
