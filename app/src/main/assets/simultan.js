@@ -87,19 +87,26 @@ function updatePauseControl(){
 function freezeClocks(){
  const now=Date.now();
  for(const g of games)if(!g.finished&&g.clock){
-  sessionTools.freezeClock(g.clock,state(g).t,now);
+  const side=state(g).t;
+  if(sessionTools.freezeClock(g.clock,side,now)||g.clock.remaining[side===1?0:1]<=0)markFlag(g,side);
  }
 }
 function markFlag(g,side){
  if(g.finished)return;
  g.finished="Zeitüberschreitung ("+(side===1?"Schwarz":"Weiß")+" gewinnt)";
  if(g.clock)g.clock.startedAt=null;
+ g.thinking=false;
+ window.SchachNovaSimultanEngine?.cancelBoard(games.indexOf(g));
  saveSession();
 }
 function resumeClocks(){
  if(panel.hidden||document.hidden||botsPaused)return;
  const now=Date.now();
- for(const g of games)if(!g.finished)sessionTools.startClock(g.clock,now);
+ for(const g of games)if(!g.finished){
+  const side=state(g).t;
+  if(g.clock&&g.clock.remaining[side===1?0:1]<=0)markFlag(g,side);
+  else sessionTools.startClock(g.clock,now);
+ }
 }
 function formatClock(seconds){
  const s=Math.ceil(Math.max(0,seconds));
@@ -121,7 +128,11 @@ function tickClocks(){
    sessionTools.freezeClock(g.clock,s.t,now);markFlag(g,s.t);expired=true;
   }
  }
- if(expired){draw();saveSession();}else updateClockView();
+ if(expired){
+  draw();saveSession();
+  const current=games[active];
+  if(current?.finished&&autoSwitch&&nextPlayable((active+1)%games.length)>=0)autoNext(current,1200);
+ }else updateClockView();
 }
 
 /* The snapshot already contains every committed move: CPU work can be safely paused. */
@@ -186,7 +197,7 @@ function drawCards(){
   else if(outcome==="Sieg")won++;
   else if(outcome==="Niederlage")lost++;
   const button=grid.children[i],label="Brett "+(i+1)+" · "+(g.finished||
-   (g.awaitingSwitch?"Wechsel folgt":state(g).t===g.humanColor?"Du bist dran":"Bot denkt"))+" · Stärke "+g.strength;
+   (botsPaused?"Pausiert":g.awaitingSwitch?"Wechsel folgt":state(g).t===g.humanColor?"Du bist dran":"Bot denkt"))+" · Stärke "+g.strength;
   const className="simultan-card"+(i===active?" active":"")+(g.finished?" finished":"");
   if(button.textContent!==label)button.textContent=label;
   if(button.className!==className)button.className=className;
