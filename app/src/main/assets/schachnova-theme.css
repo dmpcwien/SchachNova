@@ -1034,3 +1034,36 @@ body[data-piece-skin="mellow"] :is(.piece-img,.review-piece,.simultan-piece){fil
 #simultanPanel #simultanPause[aria-pressed="true"]{background:#b7daf2;color:#08253b;border:1px solid #8fcfff;font-weight:700}
 #simultanPanel .simultan-controls{column-gap:6px;row-gap:5px}
 #simultanPanel .simultan-controls button{min-height:44px;flex:1 1 42%;line-height:1.2}
+
+/* Simultan 1.0.12: condensed mobile-first game screen. */
+#simultanPanel .simultan-settings{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:4px 6px;max-height:34vh;overflow-y:auto}
+#simultanPanel .simultan-settings>button{min-height:44px;flex:1 1 145px;font-size:12px}
+#simultanPanel #simultanSettings{flex:1 1 170px;min-width:0}
+#simultanPanel #simultanSettings summary{list-style:none;cursor:pointer;min-height:42px;border-radius:10px;background:#254c72;padding:11px;color:#fff;border:1px solid #79addc}
+#simultanPanel #simultanSettings summary::-webkit-details-marker{display:none}
+#simultanPanel #simultanSettings summary:focus-visible{outline:2px solid #ffdf87}
+#simultanPanel .simultan-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:7px;padding:8px 1px}
+#simultanPanel .simultan-options label{display:flex;flex-direction:column;gap:4px;min-width:0}
+#simultanPanel .simultan-options select{width:100%;max-width:100%;min-height:44px!important;background:#123657;color:#fff;border:1px solid #89b9e6;font-size:13px}
+#simultanPanel .simultan-options button{min-height:44px;align-self:end}
+#simultanPanel .simultan-toolsbar{display:flex;gap:6px;overflow-x:auto;flex:0 0 auto;scrollbar-width:thin;overscroll-behavior-x:contain;padding:2px 0}
+#simultanPanel .simultan-toolsbar button{flex:0 0 auto;border:1px solid #639cc5;border-radius:8px;background:#183e60;color:#fff;padding:8px 11px;min-height:44px;font-size:12px;white-space:nowrap}
+#simultanPanel #simultanClockView{font-size:12px;font-weight:600;color:#d6edff;text-align:center;flex:0 0 auto;min-height:17px;font-variant-numeric:tabular-nums}
+#simultanPanel .simultan-report[hidden]{display:none!important}
+#simultanPanel .simultan-report{position:fixed;z-index:1500;inset:0;background:#071629f2;padding:env(safe-area-inset-top,12px) 12px env(safe-area-inset-bottom,12px);display:flex;justify-content:center;align-items:center}
+#simultanPanel .simultan-report-box{width:min(100%,640px);height:min(88dvh,760px);overflow:auto;border:1px solid #6fa8d7;border-radius:16px;background:#112f4d;padding:14px;color:#eff7ff}
+#simultanPanel .simultan-report-box button{min-height:44px;background:#245d86;color:white;border:1px solid #91cff7;border-radius:8px;padding:8px 14px}
+#simultanPanel .simultan-report-box h2{font-size:19px;margin:12px 0}
+#simultanPanel .simultan-report-box p{font-size:13px;line-height:1.5;border-bottom:1px solid #345a78;padding:5px 0;margin:4px 0}
+#simultanPanel .simultan-board{width:min(100%,calc(100dvh - 375px),540px)!important;max-height:calc(100dvh - 375px)}
+@media(max-height:760px){
+ #simultanPanel>p{display:none!important}
+ #simultanPanel .simultan-settings{max-height:28vh}
+ #simultanPanel .simultan-board{width:min(100%,calc(100dvh - 325px),540px)!important;max-height:calc(100dvh - 325px)}
+ #simultanPanel .simultan-grid{flex-basis:55px;min-height:55px;max-height:55px}
+}
+@media(max-height:600px){
+ #simultanPanel .simultan-board{width:min(100%,calc(100dvh - 265px),540px)!important;max-height:calc(100dvh - 265px)}
+ #simultanPanel .simultan-settings>button{min-height:39px}
+ #simultanPanel .simultan-controls button{min-height:39px}
+}
