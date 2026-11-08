@@ -43,7 +43,7 @@ function move(m){
  const old=current();
  const next={...old,b:old.b.slice(),t:-old.t};
  next.b[m[1]]=next.b[m[0]];next.b[m[0]]=".";
- history.push(next);movesPlayed.push(m);viewIndex=history.length-1;
+ history.push(next);movesPlayed.push(m);viewIndex=history.length-1;if(typeof ctx!=="undefined")ctx.viewIndex=viewIndex;
 }
 let instance=0;
 const allWorkerCommands=[];
