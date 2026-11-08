@@ -27,7 +27,7 @@ const board={children:[],replaceChildren(){this.children=[];},append(n){this.chi
 const summary={textContent:""};
 const games=Array.from({length:20},(_,i)=>({
  humanColor:i%2?1:-1,strength:i,finished:"",awaitingSwitch:false,thinking:false,
- history:[{t:i%2?1:-1}]
+ history:[{t:1}]
 }));
 const view={grid,board,summary,games,active:0,document:{createElement:()=>element()},
  state:g=>g.history[g.history.length-1]
