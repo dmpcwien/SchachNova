@@ -10,10 +10,22 @@ const setInfo=t=>{if(info)info.textContent=t;};
 /* Deliberate, strength-dependent thinking time. Skill controls playing strength;
    this delay controls how quickly a computed move becomes visible. */
 const botThinkMs=()=>Math.round(1100+Math.max(0,Math.min(20,strength))*115);
-let botDelayTimer=null,botDelayGeneration=0;
+let botDelayTimer=null,botDelayGeneration=0,coachReplyTimer=null;
+function cancelCoachReplyTimer(){if(coachReplyTimer!==null){clearTimeout(coachReplyTimer);coachReplyTimer=null;}}
+function watchCoachReply(){
+ if(!window.schachNovaCoachMatch||variantMode!=="standard"||coachReplyTimer!==null)return;
+ const position=current(),expected=movesPlayed.map(notation).join(" ");
+ coachReplyTimer=setTimeout(()=>{
+  coachReplyTimer=null;
+  if(mode!=="bot"||ended||variantMode!=="standard"||current()!==position||
+     current().t!==botSide()||viewIndex!==history.length-1||
+     movesPlayed.map(notation).join(" ")!==expected||botDelayTimer!==null)return;
+  standardFailure("Coach-Gegner hat nicht rechtzeitig geantwortet");
+ },8000);
+}
 function cancelBotDelay(){botDelayGeneration++;if(botDelayTimer!==null)clearTimeout(botDelayTimer);botDelayTimer=null;}
 function deliverBotMove(chosen,position,expected,started){
- cancelBotDelay();
+ cancelCoachReplyTimer();cancelBotDelay();
  const generation=botDelayGeneration;
  const wait=Math.max(0,botThinkMs()-(Date.now()-started));
  botDelayTimer=setTimeout(()=>{
@@ -35,7 +47,7 @@ function resetStandardEngine(){
  if(old){try{old.terminate();}catch(_){}}
 }
 function standardFailure(reason){
- resetStandardEngine();standardFaulted=true;
+ cancelCoachReplyTimer();resetStandardEngine();standardFaulted=true;
  setInfo("⚠ Stockfish 19 ausgefallen ("+reason+"). Notfallmodus: lokaler Ersatzgegner.");
  if(mode==="bot"&&variantMode==="standard")playVariantFallback();
 }
@@ -141,6 +153,7 @@ function playVariantFallback(localMode=false){
 }
 function maybePlay(){
  if(mode!=="bot"||current().t!==botSide()||ended||viewIndex!==history.length-1||botDelayTimer!==null)return;
+ watchCoachReply();
  if(variantMode!=="standard"){
   if(variantMode==="torpedo"){playTorpedoBot();return;}
   if(window.SchachNovaVariants?.[variantMode]?.bot===false){setInfo("Für diese Variante ist nur das lokale Spiel zu zweit freigegeben");return;}
@@ -164,7 +177,7 @@ function maybePlay(){
  try{worker.postMessage("setoption name Skill Level value "+strength);sendPosition();worker.postMessage("go movetime 450");watchStandard("Zugberechnung");setInfo(window.schachNovaCoachMatch?"Coach-Gegner überlegt · Stockfish offline":"Computer überlegt · Stockfish offline");}
  catch(e){standardFailure("Zugberechnung: "+e.message);}
 }
-bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="bot"){clearFairyWatchdog();cancelBotDelay();if(fallbackTimer!==null){clearTimeout(fallbackTimer);fallbackTimer=null;}if(fairy)fairy.stop();if(worker&&busy)resetStandardEngine();botPosition=null;}if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
+bot.addEventListener("change",()=>{mode=bot.value;if(mode!=="bot"){clearFairyWatchdog();cancelCoachReplyTimer();cancelBotDelay();if(fallbackTimer!==null){clearTimeout(fallbackTimer);fallbackTimer=null;}if(fairy)fairy.stop();if(worker&&busy)resetStandardEngine();botPosition=null;}if(mode!=="human"&&variantMode==="standard")startEngine();setInfo(mode==="human"?"Zwei Spieler · lokal":"Stockfish wird vorbereitet …");maybePlay();});
 try{const saved=localStorage.getItem("schachnova.botStrength");if(saved!==null&&[...level.options].some(o=>o.value===saved))level.value=saved;}catch(e){}strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;
 level.addEventListener("change",()=>{strength=Number(level.value);if(homeLevel)homeLevel.value=level.value;try{localStorage.setItem("schachnova.botStrength",level.value);}catch(e){}setInfo("Bot-Stärke eingestellt: "+level.selectedOptions[0].textContent);if(worker&&ready&&!busy)worker.postMessage("setoption name Skill Level value "+strength);});
 homeLevel?.addEventListener("change",()=>{level.value=homeLevel.value;level.dispatchEvent(new Event("change"));});
@@ -183,5 +196,5 @@ window.schachNovaBotKickoff=()=>{
 // The dedicated live-coach.js owns the Coach button and its separate analysis worker.
 // Do not attach a second Coach handler or run duplicate analyses here.
 const baseMove=move;move=function(m){const count=movesPlayed.length;baseMove(m);if(movesPlayed.length!==count)maybePlay();};
-const baseNew=document.getElementById("newGame").onclick;document.getElementById("newGame").onclick=()=>{clearFairyWatchdog();if(fallbackTimer!==null){clearTimeout(fallbackTimer);fallbackTimer=null;}cancelBotDelay();resetStandardEngine();standardFaulted=false;if(fairy)fairy.close();fairyVariant=null;fairyReady=false;fairyRequested=false;fairyFaulted=false;busy=false;pending=null;botPosition=null;baseNew();maybePlay();};
+const baseNew=document.getElementById("newGame").onclick;document.getElementById("newGame").onclick=()=>{clearFairyWatchdog();cancelCoachReplyTimer();if(fallbackTimer!==null){clearTimeout(fallbackTimer);fallbackTimer=null;}cancelBotDelay();resetStandardEngine();standardFaulted=false;if(fairy)fairy.close();fairyVariant=null;fairyReady=false;fairyRequested=false;fairyFaulted=false;busy=false;pending=null;botPosition=null;baseNew();maybePlay();};
 })();
