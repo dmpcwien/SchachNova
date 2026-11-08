@@ -5,21 +5,48 @@ const vm=require("node:vm");
 const src=fs.readFileSync("app/src/main/assets/simultan.js","utf8");
 const html=fs.readFileSync("app/src/main/assets/index.html","utf8");
 const css=fs.readFileSync("app/src/main/assets/schachnova-theme.css","utf8");
-for(const id of ["simultanSummary","simultanAutoSwitch","simultanPromotionDialog","simultanClaimDraw","simultanResumeNotice"])
+const t=require("../app/src/main/assets/simultan-tools.js");
+for(const id of ["simultanSummary","simultanAutoSwitch","simultanPromotionDialog","simultanClaimDraw","simultanResumeNotice",
+ "simultanClockMinutes","simultanClockIncrement","simultanStrengthMode","simultanExport","simultanImport","simultanPgn","simultanPgnAll","simultanAnalyze"])
  assert.ok(html.includes('id="'+id+'"'),"Missing control "+id);
 assert.match(css,/\.simultan-promotion\[hidden\]/);
-assert.match(src,/button\.onclick=\(\)=>showBoard\(i,true\)/,"Finished boards must remain selectable");
-assert.match(src,/simultan\.v1/);
+assert.match(src,/button\.onclick=\(\)=>showBoard\(i,true\)/);
 assert.match(src,/function standardKey\(s\)/);
 assert.match(src,/repeatCount\(g\)>=5/);
 assert.match(src,/function drawClaimReason\(g\)/);
-assert.match(src,/g\.finished="Remis \("\+reason\+"\)"/);
-assert.match(src,/if\(shouldSwitch&&autoSwitch\)/);
 assert.match(src,/function hidePromotion\(\)/);
+assert.match(src,/function buildSnapshot\(json\)/);
 assert.doesNotMatch(src,/window\.prompt\("Bauernumwandlung/);
+const games=Array.from({length:20},(_,i)=>({
+ humanColor:i%2?1:-1,strength:i,moves:i===0?["e2e4","e7e5"]:[],finished:"",turn:1,clock:null
+}));
+const opts={active:10,autoSwitch:false,botsPaused:true,powerMode:"eco",
+ strengthMode:"same",fixedStrength:10,startedAt:1762000000000};
+const exported=t.serialize(games,opts);
+const recovered=t.parse(JSON.stringify(exported));
+assert.equal(recovered.games.length,20);
+assert.deepEqual(recovered.games[0].moves,["e2e4","e7e5"]);
+assert.equal(recovered.active,10);
+assert.equal(recovered.powerMode,"eco");
+assert.equal(recovered.strengthMode,"same");
+assert.equal(recovered.fixedStrength,10);
+assert.equal(recovered.botsPaused,true);
+const legacy=t.parse(JSON.stringify({version:1,active:3,autoSwitch:false,
+ games:games.map(g=>({humanColor:g.humanColor,strength:g.strength,moves:g.moves,finished:""}))}));
+assert.equal(legacy.games.length,20);
+assert.equal(legacy.strengthMode,"random");
+assert.equal(legacy.games[0].clock,null);
+for(const bad of [
+ {...exported,games:exported.games.slice(0,4)},
+ {...exported,games:exported.games.map((g,i)=>i===0?{...g,moves:["a1a8","NOT_A_MOVE"]}:g)},
+ {...exported,games:exported.games.map((g,i)=>i===1?{...g,moves:Array(501).fill("e2e4")}:g)},
+ {...exported,games:exported.games.map((g,i)=>i===2?{...g,strength:999}:g)},
+ {...exported,games:exported.games.map((g,i)=>i===3?{...g,finished:"Weiß gewinnt durch Trick"}:g)}
+])assert.throws(()=>t.parse(JSON.stringify(bad)));
+assert.throws(()=>t.parse("x".repeat(800001)));
 function extract(name){
  const at=src.indexOf("function "+name+"(");
- assert.ok(at>=0,name+" function missing");
+ assert.ok(at>=0,"Missing "+name);
  const open=src.indexOf("{",at);let depth=0;
  for(let i=open;i<src.length;i++){
   if(src[i]==="{")depth++;
@@ -27,42 +54,18 @@ function extract(name){
  }
  throw Error("Unbalanced "+name);
 }
-const code=[extract("saveSession"),extract("loadSession")].join("\n");
-const data=[1,2,3,4,5].map((n)=>({humanColor:n%2?1:-1,strength:n,moves:[["e2e4"]],finished:""}));
-const mem={};
-const context={
- localStorage:{getItem:k=>mem[k]??null,setItem:(k,v)=>{mem[k]=v;}},
- storageKey:"schachnova.simultan.v1",
- console:{warn(){}}
+const ctx={
+ sessionTools:t,
+ fresh:()=>({history:[{t:1}],moves:[],humanColor:1,strength:0,finished:"",clock:null}),
+ state:g=>g.history[g.history.length-1],
+ legalStandard:s=>s.t===1?[["e2e4"]]:[["e7e5"]],
+ notation:m=>m[0],applyStandard:s=>({t:-s.t}),
+ status:g=>"",drawClaimReason:g=>""
 };
-vm.createContext(context);
-const setup=[
- "let games="+JSON.stringify(data)+";",
- "let active=2;let autoSwitch=false;let botsPaused=true;let powerMode=\"eco\";",
- "const notation=m=>m[0];",
- 'const autoToggle={checked:true},count={value:""},resumeNotice={textContent:""},powerSelect={value:""},pauseButton={textContent:"",setAttribute(){}};',
- 'function updatePauseControl(){pauseButton.textContent=botsPaused?"pausiert":"läuft";}',
- 'const fresh=()=>({history:[{}],moves:[],humanColor:1,strength:0,finished:""});',
- "const state=g=>g.history[g.history.length-1];",
- 'const legalStandard=s=>[["e2e4"]];',
- "const applyStandard=(s,m)=>({});",
- 'const status=g=>"";',
- 'const drawClaimReason=g=>"";',
- code,
- "saveSession();",
- "games=[];active=0;autoSwitch=true;botsPaused=false;powerMode=\"balanced\";",
- 'if(!loadSession())throw Error("Valid save was rejected");',
- 'if(games.length!==5||active!==2||autoSwitch!==false||games[0].moves.length!==1||count.value!=="5"||botsPaused!==true||powerMode!=="eco"||powerSelect.value!=="eco")throw Error("Restoration incorrect");'
-].join("\n");
-vm.runInContext(setup,context);
-assert.equal(JSON.parse(mem[context.storageKey]).games.length,5);
-assert.equal(JSON.parse(mem[context.storageKey]).autoSwitch,false);
-assert.equal(JSON.parse(mem[context.storageKey]).botsPaused,true);
-assert.equal(JSON.parse(mem[context.storageKey]).powerMode,"eco");
-const bad=JSON.parse(mem[context.storageKey]);bad.games[1].moves=["a1a8"];
-mem[context.storageKey]=JSON.stringify(bad);
-vm.runInContext('if(loadSession())throw Error("Illegal persisted move was accepted")',context);
-const huge=JSON.parse(mem[context.storageKey]);huge.games[1].moves=Array(501).fill("e2e4");
-mem[context.storageKey]=JSON.stringify(huge);
-vm.runInContext('if(loadSession())throw Error("Unbounded game was accepted")',context);
-console.log("Simultan saving, legal replay, corrupt-session rejection, rules and UI controls verified");
+vm.createContext(ctx);
+vm.runInContext(extract("buildSnapshot"),ctx);
+const ok=vm.runInContext('buildSnapshot('+JSON.stringify(JSON.stringify(exported))+')',ctx);
+assert.equal(ok.games[0].moves.length,2);
+const invalid=JSON.parse(JSON.stringify(exported));invalid.games[0].moves=["a1a8"];
+assert.throws(()=>vm.runInContext('buildSnapshot('+JSON.stringify(JSON.stringify(invalid))+')',ctx),/Ungültiger Zug/);
+console.log("Legacy backups, 20-board portable JSON, legal replay and corrupt import rejection passed");
