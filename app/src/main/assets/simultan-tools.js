@@ -14,13 +14,13 @@
  function makeClock(minutes=0,increment=0){
   const base=Number(minutes),inc=Number(increment);
   if(!Number.isInteger(base)||base<0||base>180||![0,1,2,3,5,10,15,30].includes(inc))throw Error("Ungültige Schachuhr");
-  return base===0?null:{remaining:[base*60,base*60],increment:inc,startedAt:null};
+  return base===0?null:{remaining:[base*60,base*60],initialSeconds:base*60,increment:inc,startedAt:null};
  }
  function copyClock(c){
   if(c===null||c===undefined)return null;
   if(!Array.isArray(c.remaining)||c.remaining.length!==2||!c.remaining.every(x=>Number.isFinite(x)&&x>=0&&x<=10860)||
      ![0,1,2,3,5,10,15,30].includes(c.increment))throw Error("Ungültige Restzeit");
-  return {remaining:c.remaining.slice(),increment:c.increment,startedAt:null};
+  return {remaining:c.remaining.slice(),initialSeconds:Number.isInteger(c.initialSeconds)&&c.initialSeconds>=60&&c.initialSeconds<=10800?c.initialSeconds:Math.ceil(Math.max(...c.remaining)/60)*60,increment:c.increment,startedAt:null};
  }
  function freezeClock(clock,side,now){
   if(!clock||clock.startedAt===null)return false;
@@ -44,7 +44,7 @@
    fixedStrength:settings.fixedStrength,startedAt:settings.startedAt,
    games:games.map(g=>({
     humanColor:g.humanColor,strength:g.strength,moves:g.moves,finished:g.finished||"",
-    clock:g.clock?{remaining:currentClock(g.clock,g.turn,Date.now()),increment:g.clock.increment}:null
+    clock:g.clock?{remaining:currentClock(g.clock,g.turn,Date.now()),initialSeconds:g.clock.initialSeconds,increment:g.clock.increment}:null
    }))};
  }
  function parse(json){
