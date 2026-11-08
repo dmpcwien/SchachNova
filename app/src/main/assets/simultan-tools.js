@@ -90,18 +90,30 @@
  }
  /* Observable, rule-based practice suggestions; never call these Stockfish error scores. */
  function training(games){
-  let opening=0,defense=0,endgame=0,blitz=0;
+  let opening=0,defense=0,endgame=0,blitz=0,material=0;
   for(const g of games){
    const own=g.moves.filter((_,i)=>i%2===(g.humanColor===1?0:1));
    if(own.length&&own.length<12)opening++;
    if(g.finished==="Schachmatt"&&result(g)==="Niederlage")defense++;
    if(g.moves.length>80)endgame++;
    if(g.finished?.startsWith("Zeitüberschreitung")&&result(g)==="Niederlage")blitz++;
+   if(Array.isArray(g.history)&&g.history.length===g.moves.length+1){
+    for(let i=0;i+1<g.moves.length;i++){
+     if(i%2!==(g.humanColor===1?0:1))continue;
+     const reply=g.moves[i+1],beforeReply=g.history[i+1];
+     if(!Array.isArray(reply)||!Array.isArray(beforeReply?.b))continue;
+     const captured=beforeReply.b[reply[1]];
+     if(!"QRBNqrbn".includes(captured||"."))continue;
+     const immediateRecapture=g.moves[i+2]&&g.moves[i+2][1]===reply[1];
+     if(!immediateRecapture)material++;
+    }
+   }
   }
   const suggestions=[
    {key:"opening",n:opening,label:"Eröffnungsgrundsätze",why:"Kurze Partien oder wenige eigene Züge",task:"5 Eröffnungsaufgaben und Entwicklung der Leichtfiguren üben"},
    {key:"defense",n:defense,label:"Mattabwehr",why:"Verlorene Partien durch Schachmatt",task:"5 Aufgaben zu Schachgeboten, Fluchtfeldern und Mattdrohungen"},
    {key:"endgame",n:endgame,label:"Endspieltechnik",why:"Partien mit über 80 Halbzügen",task:"5 Endspiele zu Bauernumwandlung und Königaktivität"},
+   {key:"material",n:material,label:"Figurensicherung",why:"Gegner schlug eine hochwertige Figur ohne unmittelbare Rücknahme",task:"5 Taktikaufgaben zu ungedeckten Figuren und Abtauschfolgen"},
    {key:"time",n:blitz,label:"Zeitmanagement",why:"Partieverlust durch Zeitüberschreitung",task:"3 kurze Partien mit Uhr und Zugtempo bewusst trainieren"}
   ];
   return suggestions.filter(x=>x.n>0).sort((a,b)=>b.n-a.n).slice(0,3);
