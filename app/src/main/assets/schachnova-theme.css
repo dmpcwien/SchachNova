@@ -1027,3 +1027,10 @@ body[data-piece-skin="mellow"] :is(.piece-img,.review-piece,.simultan-piece){fil
 #simultanPanel .simultan-promotion button:focus-visible{outline:3px solid #ffdd57}
 #simultanPanel .simultan-board{width:min(100%,calc(100dvh - 342px),540px)!important;max-height:calc(100dvh - 342px)}
 @media(max-height:720px){#simultanPanel .simultan-board{width:min(100%,calc(100dvh - 295px),540px)!important;max-height:calc(100dvh - 295px)}}
+
+/* Simultan 1.0.11: power profiles and a clear manual computer pause. */
+#simultanPanel #simultanPowerMode{max-width:190px;min-width:155px;min-height:44px}
+#simultanPanel #simultanPause{min-height:44px;touch-action:manipulation}
+#simultanPanel #simultanPause[aria-pressed="true"]{background:#b7daf2;color:#08253b;border:1px solid #8fcfff;font-weight:700}
+#simultanPanel .simultan-controls{column-gap:6px;row-gap:5px}
+#simultanPanel .simultan-controls button{min-height:44px;flex:1 1 42%;line-height:1.2}
