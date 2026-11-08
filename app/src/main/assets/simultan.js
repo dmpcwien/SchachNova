@@ -96,7 +96,7 @@ function markFlag(g,side){
  g.finished="Zeitüberschreitung ("+(side===1?"Schwarz":"Weiß")+" gewinnt)";
  if(g.clock)g.clock.startedAt=null;
  g.thinking=false;
- window.SchachNovaSimultanEngine?.cancelBoard(games.indexOf(g));
+ window.SchachNovaSimultanEngine?.cancelBoard?.(games.indexOf(g));
  saveSession();
 }
 function resumeClocks(){
