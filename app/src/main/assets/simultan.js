@@ -320,7 +320,7 @@ function botMove(g){
   timers.add(timer);
  }).catch(()=>fallback());
 }
-function start(){if(games.length&&games.some(g=>!g.finished)&&!window.confirm("Laufende Simultanpartie ersetzen? Der bisherige Spielstand geht verloren."))return;cancelSwitch();stopMotion();hidePromotion();epoch++;window.SchachNovaSimultanEngine?.reset();for(const t of timers)clearTimeout(t);timers.clear();fixedStrength=Math.max(0,Math.min(20,Number(strength.value)||0));strengthMode=strengthModeSelect?.value==="same"?"same":"random";defaultClockMinutes=Number(clockMinutes?.value)||0;defaultIncrement=Number(clockIncrement?.value)||0;startedAt=Date.now();games=Array.from({length:Math.min(20,Math.max(5,Number(count.value)||5))},fresh);botsPaused=false;updatePauseControl();active=0;selected=-1;panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");saveSession();draw();resumeClocks();for(const g of games)if(g.humanColor===-1)botMove(g);}
+function start(){if(games.length&&games.some(g=>!g.finished)&&!window.confirm("Laufende Simultanpartie ersetzen? Der bisherige Spielstand geht verloren."))return;try{const previous=localStorage.getItem(storageKey);if(previous)localStorage.setItem(storageKey+".previous",previous);}catch(_){}cancelSwitch();stopMotion();hidePromotion();epoch++;window.SchachNovaSimultanEngine?.reset();for(const t of timers)clearTimeout(t);timers.clear();fixedStrength=Math.max(0,Math.min(20,Number(strength.value)||0));strengthMode=strengthModeSelect?.value==="same"?"same":"random";defaultClockMinutes=Number(clockMinutes?.value)||0;defaultIncrement=Number(clockIncrement?.value)||0;startedAt=Date.now();games=Array.from({length:Math.min(20,Math.max(5,Number(count.value)||5))},fresh);botsPaused=false;updatePauseControl();active=0;selected=-1;panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");saveSession();draw();resumeClocks();for(const g of games)if(g.humanColor===-1)botMove(g);}
 $("simultanOpen").addEventListener("click",()=>{panel.hidden=false;panel.classList.remove("simultan-closing");panel.classList.add("simultan-opening");if(!games.length)start();else{draw();resumeBots();}});
 $("simultanStart").addEventListener("click",start);strength.addEventListener("change",()=>{if(games[active]){games[active].strength=Number(strength.value);saveSession();draw();}});
 $("simultanClose").addEventListener("click",()=>{cancelSwitch();hidePromotion();if(games[active])games[active].awaitingSwitch=false;pauseBots();saveSession();panel.classList.remove("simultan-opening");panel.classList.add("simultan-closing");setTimeout(()=>{if(panel.classList.contains("simultan-closing")){panel.hidden=true;panel.classList.remove("simultan-closing");}},220);});
@@ -371,6 +371,18 @@ function importSessionText(text){
 }
 window.schachnovaReceiveSimultanImport=importSessionText;
 $("simultanExport")?.addEventListener("click",exportSession);
+$("simultanRestorePrevious")?.addEventListener("click",()=>{
+ try{
+  const old=localStorage.getItem(storageKey+".previous");
+  if(!old){if(resumeNotice)resumeNotice.textContent="Keine vorherige Sicherung vorhanden.";return;}
+  const data=buildSnapshot(old);
+  if(!window.confirm("Die vorherige Simultan-Sicherung wiederherstellen? Die aktuelle wird dadurch ersetzt."))return;
+  const current=localStorage.getItem(storageKey);
+  useSnapshot(data);
+  if(current)localStorage.setItem(storageKey+".previous",current);
+  if(resumeNotice)resumeNotice.textContent="Vorherige Simultan-Sicherung wiederhergestellt.";
+ }catch(e){if(resumeNotice)resumeNotice.textContent="Wiederherstellung fehlgeschlagen: "+e.message;}
+});
 $("simultanImport")?.addEventListener("click",()=>{
  if(window.AndroidFiles?.openJson)window.AndroidFiles.openJson();else importInput?.click();
 });
