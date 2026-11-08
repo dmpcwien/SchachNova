@@ -103,3 +103,12 @@ Keine Android-Signierschlüssel, Tokens oder Passwörter in diesem öffentlichen
 - PGN-Tag-Inhalte werden weiterhin maskiert und geprüft, um fehlerhafte Metadaten zu vermeiden.
 - Neue Tests überprüfen Ergebnisse bei Matt und Zeitablauf, PGN-Metadaten sowie die Pausensperre zur Laufzeit.
 - **Prüfgrenze:** GitHub Actions kontrolliert Syntax, Regressionen, Android-Build und Signatur. Bedienung und Akkulaufzeit bleiben auf einem echten Gerät zu prüfen.
+
+## Simultan: Uhren und Engine-Warteschlange (1.0.14)
+- Eine Zeitüberschreitung wird nun auch beim Pausieren oder Schließen korrekt als Ergebnis gespeichert, selbst wenn die letzte sichtbare Sekunde bereits vorüber ist.
+- Bei Wiederaufnahme des Simultan-Modus werden Bretter mit aufgebrauchter Restzeit nicht erneut gestartet.
+- Verliert das aktive Brett auf Zeit, kann der automatische Wechsel zum nächsten noch laufenden Brett erfolgen.
+- Bei einem abgelaufenen Brett entfernt der gemeinsame Stockfish-Worker dessen wartende Engine-Aufträge aus der Warteschlange. Eine gerade laufende Suche wird per UCI-"stop" beendet; andere Bretter behalten ihre Aufträge.
+- Pausierte Bretter zeigen ihren Zustand bereits in der Brettübersicht.
+- Zusätzliche Regressionstests: `tests/simultan-expiry.test.cjs` und `tests/simultan-engine-cancel.test.cjs`. Die bestehenden Tests zu 20 Brettern, Datenwiederherstellung, Ergebnissen und Uhr bleiben erhalten.
+- Die Tests prüfen Codepfade und simulierte Engine-Antworten. Reale Akkulaufzeit, Bildrate und Zuverlässigkeit unter mehrstündiger Last auf Android sind nicht gemessen.
